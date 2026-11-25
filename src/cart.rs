@@ -259,8 +259,17 @@ pub async fn get(
     store: &Store,
     clear_uncertain: bool,
 ) -> Result<Value> {
-    let basket = read_basket(api, session).await?;
     let mut pending = store.pending()?;
+    if clear_uncertain
+        && pending.as_ref().is_some_and(|pending| {
+            pending["customer_id"].as_str() != Some(session.customer_id.as_str())
+        })
+    {
+        return Err(Error::Input(
+            "The unresolved cart write belongs to another account. Sign in to the account that owns it before using `cart --clear-uncertain`.",
+        ));
+    }
+    let basket = read_basket(api, session).await?;
     if pending
         .as_ref()
         .is_some_and(|p| pending_matches(basket.as_ref(), p, session))
@@ -434,27 +443,31 @@ pub async fn set(
     if line.is_some_and(|line| decimal(&line["quantity"]).is_ok_and(|old| old == desired)) {
         return format_cart(api, session, basket.as_ref(), None).await;
     }
-    let detail = api
-        .request(
-            Method::GET,
-            "product/shopper-products",
-            &format!("products/{product}"),
-            &session.access_token,
-            &[("expand", "images,prices,availability".into())],
-            None,
-        )
-        .await?;
-    if detail["id"].as_str() != Some(product) {
-        return Err(Error::Response);
+    // Removing an ordinary line cannot introduce reservation mixing, and its
+    // catalog record may no longer exist. select_line checked the target itself.
+    if !desired.is_zero() {
+        let detail = api
+            .request(
+                Method::GET,
+                "product/shopper-products",
+                &format!("products/{product}"),
+                &session.access_token,
+                &[("expand", "images,prices,availability".into())],
+                None,
+            )
+            .await?;
+        if detail["id"].as_str() != Some(product) {
+            return Err(Error::Response);
+        }
+        if reservation_product(&detail) {
+            return Err(Error::Input(
+                "This product requires a reservation or delivery-date choice. Use the official website.",
+            ));
+        }
+        validate_quantity(&detail, desired)?;
+        ensure_not_reserved(api, session, &[product]).await?;
+        ensure_basket_not_reserved(api, session, basket.as_ref(), product).await?;
     }
-    if reservation_product(&detail) {
-        return Err(Error::Input(
-            "This product requires a reservation or delivery-date choice. Use the official website.",
-        ));
-    }
-    validate_quantity(&detail, desired)?;
-    ensure_not_reserved(api, session, &[product]).await?;
-    ensure_basket_not_reserved(api, session, basket.as_ref(), product).await?;
     let line_id = line
         .and_then(|line| line["itemId"].as_str())
         .map(str::to_owned);
@@ -637,6 +650,59 @@ mod tests {
         }
     }
     #[tokio::test]
+    async fn clearing_uncertain_cart_requires_the_pending_account() {
+        for clear_uncertain in [false, true] {
+            let server = MockServer::start().await;
+            let api = Api::mock(server.uri());
+            Mock::given(method("GET"))
+                .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/customer1/baskets"))
+                .respond_with(ResponseTemplate::new(200).set_body_json(json!({"total":0,"baskets":[]})))
+                .expect(if clear_uncertain { 0 } else { 1 })
+                .mount(&server).await;
+            let temp = tempfile::tempdir().unwrap();
+            let store = Store {
+                directory: temp.path().join("state"),
+                backend: crate::store::CredentialStore::File,
+            };
+            let _lock = store.lock().await.unwrap();
+            let pending = json!({"customer_id":"another-account","product_id":"42171","quantity":"0","stage":"set_item"});
+            store.set_pending(&pending).unwrap();
+            let result = get(&api, &session(&api), &store, clear_uncertain).await;
+            if clear_uncertain {
+                assert!(
+                    matches!(result, Err(Error::Input(message)) if message.contains("Sign in to the account that owns it"))
+                );
+                assert!(server.received_requests().await.unwrap().is_empty());
+            } else {
+                assert_eq!(result.unwrap()["pending_write"], pending);
+            }
+            assert_eq!(store.pending().unwrap(), Some(pending));
+        }
+    }
+    #[tokio::test]
+    async fn pending_account_can_clear_manually_or_by_observed_state() {
+        for clear_uncertain in [false, true] {
+            let server = MockServer::start().await;
+            let api = Api::mock(server.uri());
+            Mock::given(method("GET"))
+                .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/customer1/baskets"))
+                .respond_with(ResponseTemplate::new(200).set_body_json(json!({"total":0,"baskets":[]})))
+                .expect(1).mount(&server).await;
+            let temp = tempfile::tempdir().unwrap();
+            let store = Store {
+                directory: temp.path().join("state"),
+                backend: crate::store::CredentialStore::File,
+            };
+            let _lock = store.lock().await.unwrap();
+            store.set_pending(&json!({"customer_id":"customer1","product_id":"42171","quantity":if clear_uncertain { "1" } else { "0" },"stage":"set_item"})).unwrap();
+            let result = get(&api, &session(&api), &store, clear_uncertain)
+                .await
+                .unwrap();
+            assert!(result["pending_write"].is_null());
+            assert!(store.pending().unwrap().is_none());
+        }
+    }
+    #[tokio::test]
     async fn selected_dated_and_exclusive_reservations_never_write() {
         for (availability, date) in [("03", json!("2026-12-01")), ("05", Value::Null)] {
             let server = MockServer::start().await;
@@ -727,6 +793,123 @@ mod tests {
                     .unwrap()
                     .iter()
                     .all(|r| r.method == "GET")
+            );
+        }
+    }
+    #[tokio::test]
+    async fn deletion_skips_catalog_prerequisites_and_requires_authoritative_readback() {
+        use std::sync::{
+            Arc,
+            atomic::{AtomicBool, Ordering},
+        };
+        for readback_succeeds in [true, false] {
+            let server = MockServer::start().await;
+            let api = Api::mock(server.uri());
+            let reserved = json!({"productId":"reserved","itemId":"reservation1","quantity":1,"c_ao_disponibilidad":"05"});
+            mock_existing_cart(&server, json!({"basketId":"basket1","productItems":[]})).await;
+            let deleted = Arc::new(AtomicBool::new(false));
+            let changed = deleted.clone();
+            Mock::given(method("DELETE"))
+                .and(path("/checkout/shopper-baskets/v1/organizations/f_ecom_blzv_prd/baskets/basket1/items/line1"))
+                .respond_with(move |_: &wiremock::Request| {
+                    changed.store(true, Ordering::SeqCst);
+                    ResponseTemplate::new(204)
+                })
+                .expect(1).mount(&server).await;
+            let remaining = reserved.clone();
+            Mock::given(method("GET"))
+                .and(path(
+                    "/checkout/shopper-baskets/v1/organizations/f_ecom_blzv_prd/baskets/basket1",
+                ))
+                .respond_with(move |_: &wiremock::Request| {
+                    if deleted.load(Ordering::SeqCst) {
+                        if readback_succeeds {
+                            ResponseTemplate::new(200).set_body_json(
+                                json!({"basketId":"basket1","productItems":[remaining]}),
+                            )
+                        } else {
+                            ResponseTemplate::new(503)
+                        }
+                    } else {
+                        ResponseTemplate::new(200).set_body_json(
+                            json!({"basketId":"basket1","productItems":[
+                                {"productId":"42171","itemId":"line1","quantity":1}, remaining
+                            ]}),
+                        )
+                    }
+                })
+                .with_priority(1)
+                .expect(2)
+                .mount(&server)
+                .await;
+            // A discontinued product may no longer have a catalog record.
+            Mock::given(method("GET"))
+                .and(path(
+                    "/product/shopper-products/v1/organizations/f_ecom_blzv_prd/products/42171",
+                ))
+                .respond_with(ResponseTemplate::new(404))
+                .with_priority(1)
+                .expect(0)
+                .mount(&server)
+                .await;
+            Mock::given(method("GET"))
+                .and(path(
+                    "/custom/saved-cart/v1/organizations/f_ecom_blzv_prd/sushi-reserve",
+                ))
+                .respond_with(ResponseTemplate::new(503))
+                .with_priority(1)
+                .expect(0)
+                .mount(&server)
+                .await;
+            // Optional photos are fetched only after successful readback.
+            Mock::given(method("GET"))
+                .and(path(
+                    "/product/shopper-products/v1/organizations/f_ecom_blzv_prd/products",
+                ))
+                .and(query_param("ids", "reserved"))
+                .respond_with(ResponseTemplate::new(404))
+                .expect(u64::from(readback_succeeds))
+                .mount(&server)
+                .await;
+            let temp = tempfile::tempdir().unwrap();
+            let store = Store {
+                directory: temp.path().join("state"),
+                backend: crate::store::CredentialStore::File,
+            };
+            let _lock = store.lock().await.unwrap();
+            let result = set(
+                &api,
+                &session(&api),
+                &store,
+                "42171",
+                Decimal::ZERO,
+                Some("line1"),
+            )
+            .await;
+            if readback_succeeds {
+                let output = result.unwrap();
+                assert_eq!(output["items"].as_array().unwrap().len(), 1);
+                assert_eq!(output["items"][0]["product_id"], reserved["productId"]);
+                assert_eq!(output["items"][0]["item_id"], reserved["itemId"]);
+                assert_eq!(output["items"][0]["quantity"], reserved["quantity"]);
+                assert!(store.pending().unwrap().is_none());
+            } else {
+                assert!(matches!(result, Err(Error::Uncertain)));
+                assert_eq!(store.pending().unwrap().unwrap()["quantity"], "0");
+            }
+            let requests = server.received_requests().await.unwrap();
+            assert_eq!(
+                requests
+                    .iter()
+                    .filter(|request| request.method == "DELETE")
+                    .count(),
+                1
+            );
+            assert_eq!(requests.len(), if readback_succeeds { 6 } else { 5 });
+            assert!(
+                requests[..5]
+                    .iter()
+                    .all(|request| !request.url.path().contains("shopper-products"))
             );
         }
     }

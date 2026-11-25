@@ -56,6 +56,8 @@ Those last two commands change the real account cart. They set an absolute
 quantity. Product/line IDs must come from the catalog/cart. An optional `--item-id`
 must identify the intended line; ambiguous or unsupported options are rejected.
 Use current quantity increments; decimals are represented exactly for validation.
+Removing an ordinary existing line does not require that product to remain in
+the current catalog. Known unsupported target-line types are still rejected.
 
 Cart reads do not create a basket. A new basket may be created for an explicit
 nonzero item change. The result contains the returned cart for review. There is
@@ -84,6 +86,8 @@ ametller-mcp cart --clear-uncertain
 is an explicit acknowledgement after checking the real cart. It does not undo a
 change or make the prior attempt safe to replay blindly. The MCP does not expose
 this override as a tool argument.
+The signed-in account must match the account that owns the pending write;
+switching accounts does not authorize clearing another account's pending record.
 
 ## Presentation and checkout
 

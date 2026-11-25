@@ -42,6 +42,9 @@ not claim current remote authentication. Live status and account operations
 validate the registered customer through Ametller. No token values appear in MCP
 output, errors or diagnostics. Logout removes local credentials, not the remote
 account session, and retains unresolved cart-write evidence.
+Loaded credentials must match the saved account identity before account calls;
+a partial account switch fails closed. Keychain cleanup handles orphaned
+credentials or metadata without requiring both to exist.
 
 ## Catalog and cart semantics
 
@@ -60,6 +63,7 @@ Before a mutation, the store persists intent and the target account/basket. A
 lost response is not replayed automatically. The server reads back the result;
 unresolved outcomes block later writes until a read observes the intended state
 or the user explicitly acknowledges reconciliation through the local CLI.
+Manual acknowledgement is restricted to the account that owns the pending write.
 
 There is no checkout, order submission, payment, delivery reservation, coupon
 activation, address mutation or automatic substitution. Explicitly requested cart

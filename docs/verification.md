@@ -2,11 +2,13 @@
 
 ## Rust beta implementation
 
-Initial implementation checks passed before review: formatting, Clippy with
-warnings denied, and 15 Rust tests including synthetic registered login, rotating
-refresh credentials, lost cart replies, absolute quantity/read-back behavior,
-private files and real subprocess MCP stdio. Three fresh review/fix iterations
-are in progress; final evidence is recorded here before publication.
+The final implementation passes formatting, Clippy with warnings denied, and
+26 Rust tests (22 unit, two captured-contract and two subprocess tests).
+Coverage includes synthetic registered login, rotating refresh credentials,
+lost cart replies, absolute quantity/read-back behavior, reservation exclusions,
+discounted prices, private files, partial Keychain cleanup states, account
+identity mismatches and real subprocess MCP stdio. Three fresh review/fix
+iterations resolved seven material findings; see [the review record](reviews.md).
 
 The built Rust CLI also passed live anonymous product search and product detail
 for product `42171`, returning the official image URL, description and purchase
@@ -18,6 +20,16 @@ The unpacked plugin passed real stdio discovery and empty-session behavior throu
 its launcher. The installed Codex CLI also parsed the package natively and
 discovered the MCP connection and setup skill without installing the plugin.
 The setup skill validator passed; the Homebrew formula passed Ruby syntax checks.
+`cargo package` built the extracted standard `.crate` successfully, and an
+isolated `cargo install --path` from that extracted package produced a working
+executable. The unpacked plugin also passed stdio tests with that installed
+binary. Package inventories exclude research checkouts, storefront bundles,
+private state and credentials. Cargo, plugin and formula versions agree.
+
+The Homebrew formula uses the installed Homebrew API's locked dependency-fetch
+and offline-install helpers. Actual Homebrew installation was not performed;
+Cargo installation was verified without changing the user's normal installation.
+The plugin was parsed/tested but not installed into the user's Codex settings.
 
 ## Initial research checks
 

@@ -251,6 +251,78 @@ mod tests {
         format!("e30.{}.signature",URL_SAFE_NO_PAD.encode(serde_json::to_vec(&json!({"isb":format!("rcid:{customer}::chid:ametller::upn:registered"),"exp":expiry})).unwrap()))
     }
     #[tokio::test]
+    async fn interrupted_account_switch_requires_login_before_account_requests() {
+        let server = MockServer::start().await;
+        let api = Api::mock(server.uri());
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store {
+            directory: temp.path().join("state"),
+            backend: CredentialStore::File,
+        };
+        let _lock = store.lock().await.unwrap();
+        let original = Session {
+            access_token: token("accountA", now() + 3600),
+            refresh_token: "original-synthetic".into(),
+            customer_id: "accountA".into(),
+            expires_at: now() + 3600,
+            config: api.config.clone(),
+        };
+        store.save(&original).unwrap();
+        let replacement = Session {
+            access_token: token("accountB", now() + 3600),
+            refresh_token: "replacement-synthetic".into(),
+            customer_id: "accountB".into(),
+            expires_at: now() + 3600,
+            config: api.config.clone(),
+        };
+        // Reproduce a save interrupted after replacing the private credential.
+        std::fs::write(
+            store.directory.join("credentials.json"),
+            serde_json::to_vec(&replacement).unwrap(),
+        )
+        .unwrap();
+        let result = registered(&api, &store).await;
+        assert!(
+            matches!(result, Err(Error::Input(message)) if message.contains("ametller-mcp login"))
+        );
+        assert!(server.received_requests().await.unwrap().is_empty());
+        let cached = crate::service::App::new(store.clone(), "ca".into())
+            .unwrap()
+            .status(false)
+            .await
+            .unwrap();
+        assert_eq!(cached["customer_id"], "accountA");
+        assert_eq!(cached["verification"], "not_checked");
+        assert!(cached["authenticated"].is_null());
+        assert!(server.received_requests().await.unwrap().is_empty());
+
+        // Missing metadata cannot expose an orphaned credential, either.
+        std::fs::remove_file(store.directory.join("connected.json")).unwrap();
+        assert!(matches!(
+            registered(&api, &store).await,
+            Err(Error::LoginRequired)
+        ));
+        assert!(server.received_requests().await.unwrap().is_empty());
+        // The successful-login save path establishes the new identity binding.
+        store.save(&replacement).unwrap();
+        Mock::given(method("GET"))
+            .and(path(
+                "/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/accountB",
+            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(json!({"customerId":"accountB","authType":"registered"})),
+            )
+            .expect(1)
+            .mount(&server)
+            .await;
+        assert_eq!(
+            registered(&api, &store).await.unwrap().customer_id,
+            "accountB"
+        );
+        assert_eq!(server.received_requests().await.unwrap().len(), 1);
+    }
+    #[tokio::test]
     async fn refresh_rotation_persisted_and_reused_without_repeating() {
         let server = MockServer::start().await;
         let api = Api::mock(server.uri());

@@ -96,7 +96,7 @@ impl Store {
     pub fn metadata(&self) -> Result<Option<Value>> {
         self.read_value("connected.json")
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", test))]
     fn keychain_account(&self) -> Result<String> {
         let path = self.directory.canonicalize().map_err(|_| Error::Storage)?;
         use sha2::{Digest, Sha256};
@@ -119,12 +119,12 @@ impl Store {
     }
     pub fn load(&self) -> Result<Option<Session>> {
         self.validate_backend()?;
+        let Some(metadata) = self.metadata()? else {
+            return Ok(None);
+        };
         let text = match self.backend {
             CredentialStore::File => self.read_bytes("credentials.json")?,
             CredentialStore::Keychain => {
-                if !self.has_session()? {
-                    return Ok(None);
-                }
                 #[cfg(target_os = "macos")]
                 {
                     Some(
@@ -143,8 +143,19 @@ impl Store {
                 }
             }
         };
-        text.map(|bytes| serde_json::from_slice(&Zeroizing::new(bytes)).map_err(|_| Error::Storage))
-            .transpose()
+        let session: Option<Session> = text
+            .map(|bytes| serde_json::from_slice(&Zeroizing::new(bytes)).map_err(|_| Error::Storage))
+            .transpose()?;
+        // Credentials and metadata are separate writes. A failed account switch
+        // must not let credentials for one account operate under another marker.
+        if session.as_ref().is_some_and(|session| {
+            metadata["customer_id"].as_str() != Some(session.customer_id.as_str())
+        }) {
+            return Err(Error::Input(
+                "Stored credentials do not match the connected account. Sign in again with `ametller-mcp login`.",
+            ));
+        }
+        Ok(session)
     }
     pub fn save(&self, session: &Session) -> Result<()> {
         self.validate_backend()?;
@@ -174,25 +185,41 @@ impl Store {
     pub fn delete(&self) -> Result<()> {
         self.validate_backend()?;
         match self.backend {
-            CredentialStore::File => self.remove("credentials.json")?,
+            CredentialStore::File => {
+                self.remove("credentials.json")?;
+                self.remove("connected.json")
+            }
             CredentialStore::Keychain => {
                 #[cfg(target_os = "macos")]
                 {
-                    if self.has_session()? {
+                    self.delete_keychain_with(|account| {
                         security_framework::passwords::delete_generic_password(
                             "ametller-mcp",
-                            &self.keychain_account()?,
+                            account,
                         )
-                        .map_err(|_| Error::Keychain)?;
-                    }
+                        .map_err(|error| error.code())
+                    })
                 }
                 #[cfg(not(target_os = "macos"))]
                 {
-                    return Err(Error::Input(
+                    Err(Error::Input(
                         "Keychain is available only on macOS. Explicitly choose --credential-store file.",
-                    ));
+                    ))
                 }
             }
+        }
+    }
+    #[cfg(any(target_os = "macos", test))]
+    fn delete_keychain_with(
+        &self,
+        delete: impl FnOnce(&str) -> std::result::Result<(), i32>,
+    ) -> Result<()> {
+        self.validate_backend()?;
+        // A save can stop after writing the credential but before its marker.
+        // Always delete this account; an already absent item is also logged out.
+        match delete(&self.keychain_account()?) {
+            Ok(()) | Err(-25300) => {} // errSecItemNotFound
+            Err(_) => return Err(Error::Keychain),
         }
         self.remove("connected.json")
     }
@@ -314,6 +341,89 @@ fn check_private(path: &Path, directory: bool) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn keychain_logout_deletes_credential_without_metadata() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store {
+            directory: temp.path().join("state"),
+            backend: CredentialStore::Keychain,
+        };
+        store.prepare().unwrap();
+        let mut credentials = std::collections::HashSet::from([store.keychain_account().unwrap()]);
+        assert!(!store.has_session().unwrap());
+        store
+            .delete_keychain_with(|account| {
+                if credentials.remove(account) {
+                    Ok(())
+                } else {
+                    Err(-25300)
+                }
+            })
+            .unwrap();
+        assert!(credentials.is_empty());
+        assert!(!store.has_session().unwrap());
+    }
+    #[test]
+    fn keychain_logout_removes_metadata_when_credential_is_already_absent() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store {
+            directory: temp.path().join("state"),
+            backend: CredentialStore::Keychain,
+        };
+        store
+            .write_value(
+                "connected.json",
+                &serde_json::json!({"credential_store":"keychain"}),
+            )
+            .unwrap();
+        let mut credentials = std::collections::HashSet::<String>::new();
+        let mut called = false;
+        store
+            .delete_keychain_with(|account| {
+                called = true;
+                if credentials.remove(account) {
+                    Ok(())
+                } else {
+                    Err(-25300)
+                }
+            })
+            .unwrap();
+        assert!(called);
+        assert!(!store.has_session().unwrap());
+    }
+    #[test]
+    fn keychain_logout_preserves_metadata_on_error_and_rejects_backend_mismatch() {
+        let temp = tempfile::tempdir().unwrap();
+        let store = Store {
+            directory: temp.path().join("state"),
+            backend: CredentialStore::Keychain,
+        };
+        store
+            .write_value(
+                "connected.json",
+                &serde_json::json!({"credential_store":"keychain"}),
+            )
+            .unwrap();
+        assert!(matches!(
+            store.delete_keychain_with(|_| Err(-25293)),
+            Err(Error::Keychain)
+        ));
+        assert!(store.has_session().unwrap());
+        store
+            .write_value(
+                "connected.json",
+                &serde_json::json!({"credential_store":"file"}),
+            )
+            .unwrap();
+        assert!(matches!(
+            store.delete_keychain_with(|_| panic!("must not delete another backend's credential")),
+            Err(Error::Input(_))
+        ));
+        assert_eq!(
+            store.metadata().unwrap().unwrap()["credential_store"],
+            "file"
+        );
+    }
     #[tokio::test]
     async fn private_store_atomic_roundtrip_and_symlinks() {
         let temp = tempfile::tempdir().unwrap();
