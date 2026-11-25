@@ -1,0 +1,25 @@
+name: Check
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.100.0 --profile minimal --component clippy,rustfmt
+      - name: Check Rust
+        run: sh scripts/check.sh
+      - name: Check release packaging
+        run: |
+          cargo build --locked
+          python3 tests/check_distribution.py --binary target/debug/ametller-mcp
+          cargo package --locked

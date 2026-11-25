@@ -1,0 +1,73 @@
+{
+  "app": {
+    "commerceAPI": {
+      "proxyPath": "/mobify/proxy/api",
+      "parameters": {
+        "clientId": "fd3c9db8-2a0d-4f4b-9e74-294e068f9ae4",
+        "organizationId": "f_ecom_blzv_prd",
+        "shortCode": "4jppt37a",
+        "siteId": "ametller"
+      }
+    },
+    "sites": [
+      {
+        "id": "ametller",
+        "l10n": {
+          "supportedCurrencies": [
+            "EUR"
+          ],
+          "defaultCurrency": "EUR",
+          "supportedLocales": [
+            {
+              "id": "es",
+              "preferredCurrency": "EUR"
+            },
+            {
+              "id": "ca",
+              "preferredCurrency": "EUR"
+            }
+          ],
+          "defaultLocale": "ca"
+        }
+      }
+    ],
+    "login": {
+      "passwordless": {
+        "enabled": false,
+        "callbackURI": "/passwordless-login-callback",
+        "landingPath": "/passwordless-login-landing"
+      },
+      "social": {
+        "enabled": false,
+        "idps": [
+          "google",
+          "apple"
+        ],
+        "redirectURI": "/social-callback"
+      },
+      "resetPassword": {
+        "callbackURI": "/reset-password-callback",
+        "landingPath": "/reset-password-landing"
+      }
+    }
+  },
+  "ssrParameters": {
+    "proxyConfigs": [
+      {
+        "host": "4jppt37a.api.commercecloud.salesforce.com",
+        "path": "api"
+      },
+      {
+        "host": "production-eu01-ametller.demandware.net",
+        "path": "ocapi"
+      },
+      {
+        "host": "production-eu01-ametller.demandware.net",
+        "path": "on/demandware.store",
+        "protocol": "https",
+        "proxyPath": "/mobify/proxy/on/demandware.store",
+        "cachingPath": "/mobify/caching/on/demandware.store"
+      }
+    ]
+  }
+}

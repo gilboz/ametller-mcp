@@ -1,0 +1,15 @@
+Ametller MCP is an independent project, not affiliated with Ametller Origen.
+
+The protocol investigation used Ametller's publicly served storefront and
+Salesforce Commerce API documentation, with these MIT-licensed projects as
+implementation references:
+
+https://github.com/igorsafonov-gif/ametller-origen
+https://github.com/denya/ametller-origen-skill
+https://github.com/andreu-alegre/ametller-cli
+
+Original reference checkouts and website bundles are local research material,
+excluded from the release crate and plugin. Their original licenses and rights
+remain in effect; this project's MIT license does not relicense retailer assets,
+product descriptions or product images. Anonymous product data used by contract
+tests is included only as a small interoperability fixture.

@@ -1,0 +1,23 @@
+{
+  "captured_at": "2026-11-25T16:27:21.250425+00:00",
+  "repositories": [
+    {
+      "repo": "https://github.com/andreu-alegre/ametller-cli.git",
+      "commit": "ec5c7707867e70fafa54c0acea8206641aec94e3",
+      "path": "andreu-alegre--ametller-cli",
+      "license": "MIT"
+    },
+    {
+      "repo": "https://github.com/denya/ametller-origen-skill.git",
+      "commit": "ac8cf5dbc90e4f25fab4d3e11c67f7d0427254c0",
+      "path": "denya--ametller-origen-skill",
+      "license": "MIT"
+    },
+    {
+      "repo": "https://github.com/igorsafonov-gif/ametller-origen.git",
+      "commit": "3b244d5903361f87648a0224d613f0b69e7aa582",
+      "path": "igorsafonov-gif--ametller-origen",
+      "license": "MIT"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "tested_at": "2026-11-25T16:26:47.726568+00:00",
+  "account": "anonymous guest",
+  "writes": "guest OAuth token issuance only; no basket, order or payment calls",
+  "steps": [
+    {
+      "operation": "guest_authorize",
+      "status": 303
+    },
+    {
+      "operation": "guest_token",
+      "status": 200
+    },
+    {
+      "operation": "search_direct",
+      "status": 200
+    },
+    {
+      "operation": "product_detail_direct",
+      "status": 200
+    },
+    {
+      "operation": "search_storefront_proxy",
+      "status": 200
+    }
+  ],
+  "access_token_expires_in_seconds": 1800,
+  "search_total": 387,
+  "returned_products": [
+    {
+      "id": "42171",
+      "name": "Manojo de Plátanos Canarios",
+      "price": 3.41,
+      "image_url": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg"
+    },
+    {
+      "id": "75",
+      "name": "Manojo de Plátanos Tropicales",
+      "price": 1.69,
+      "image_url": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dw0843f7a5/images/products/75/75_1.jpg"
+    },
+    {
+      "id": "20212",
+      "name": "Manojo de Plátanos Canarios Essencials",
+      "price": 3.19,
+      "image_url": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwf28900a0/images/products/20212/20212_1.jpg"
+    }
+  ],
+  "detail_keys": [
+    "c_ao_origen",
+    "c_ao_pesoAproximado",
+    "c_ao_preferencias",
+    "c_c_ao_collection",
+    "c_isPack",
+    "c_isSale",
+    "currency",
+    "ean",
+    "id",
+    "imageGroups",
+    "inventory",
+    "minOrderQuantity",
+    "name",
+    "price",
+    "pricePerUnit",
+    "primaryCategoryId",
+    "shortDescription",
+    "slugUrl",
+    "stepQuantity",
+    "type",
+    "unitMeasure",
+    "unitQuantity"
+  ],
+  "proxy_search_total": 387,
+  "result": "passed"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "ametller",
+  "version": "0.1.0-beta.1",
+  "description": "Browse Ametller products and manage your grocery cart through a local Rust MCP.",
+  "author": { "name": "gilboz" },
+  "repository": "https://github.com/gilboz/ametller-mcp",
+  "license": "MIT",
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "onboardingSkill": "./skills/setup/SKILL.md"
+    }
+  },
+  "interface": {
+    "displayName": "Ametller",
+    "shortDescription": "Find groceries and prepare your Ametller cart",
+    "longDescription": "Search the live catalog, compare photos and pack sizes, and update your real cart when requested. Sign in privately through the local CLI; review and pay on the official Ametller site.",
+    "developerName": "gilboz",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Show me Ametller yogurt options with photos and pack sizes.",
+      "Review my Ametller cart and its estimated total."
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "currency": "EUR",
+  "ean": "2042171000005",
+  "id": "42171",
+  "imageGroups": [
+    {
+      "images": [
+        {
+          "alt": "Manojo de Plátanos Canarios ",
+          "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "title": "Manojo de Plátanos Canarios "
+        }
+      ],
+      "viewType": "large"
+    },
+    {
+      "images": [
+        {
+          "alt": "Manojo de Plátanos Canarios ",
+          "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "title": "Manojo de Plátanos Canarios "
+        }
+      ],
+      "viewType": "medium"
+    },
+    {
+      "images": [
+        {
+          "alt": "Manojo de Plátanos Canarios ",
+          "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+          "title": "Manojo de Plátanos Canarios "
+        }
+      ],
+      "viewType": "small"
+    }
+  ],
+  "inventory": {
+    "ats": 999999,
+    "backorderable": false,
+    "id": "ALM-01",
+    "orderable": true,
+    "preorderable": false,
+    "stockLevel": 999999
+  },
+  "minOrderQuantity": 1,
+  "name": "Manojo de Plátanos Canarios",
+  "price": 3.41,
+  "pricePerUnit": 3.79,
+  "primaryCategoryId": "21",
+  "shortDescription": "El plátano de Canarias que tenemos en nuestra Tienda Online se caracteriza por ser una variedad dulce y con una textura firme y cremosa. A diferencia de las bananas, es un poco más pequeño y tiene una concentración mayor de nutrientes, especialmente el potasio y el fósforo. Si quieres disfrutarlo al máximo, te recomendamos comértelo al natural o hacerlo al horno.",
+  "slugUrl": "https://www.ametllerorigen.com/es/manojo-de-platanos-canarios/42171.html",
+  "stepQuantity": 1,
+  "type": {
+    "item": true
+  },
+  "unitMeasure": "KG",
+  "unitQuantity": 0.9,
+  "c_ao_origen": "LES PALMES",
+  "c_ao_pesoAproximado": 0.9,
+  "c_ao_preferencias": [
+    "7"
+  ],
+  "c_c_ao_collection": "933",
+  "c_isPack": false,
+  "c_isSale": false
+}

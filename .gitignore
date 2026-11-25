@@ -1,0 +1,13 @@
+/target/
+/sources/github/*/
+/sources/web/raw/
+/sources/web/pretty/
+/sources/tooling/
+/.private/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*
+*.har
+

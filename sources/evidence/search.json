@@ -1,0 +1,591 @@
+{
+  "limit": 3,
+  "effectiveSearchMode": "lexical",
+  "hits": [
+    {
+      "currency": "EUR",
+      "hitType": "product",
+      "image": {
+        "alt": "Manojo de Plátanos Canarios ",
+        "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+        "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+        "title": "Manojo de Plátanos Canarios "
+      },
+      "price": 3.41,
+      "pricePerUnit": 3.79,
+      "productId": "42171",
+      "productName": "Manojo de Plátanos Canarios",
+      "productType": {
+        "item": true
+      },
+      "representedProduct": {
+        "id": "42171"
+      },
+      "c_instaleapHit": {
+        "id": "42171",
+        "name": "Manojo de Plátanos Canarios",
+        "photo_url": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwfe29296b/images/products/42171/42171_2.jpg",
+        "unit": "KG",
+        "sub_unit": "KG",
+        "quantity": 0.9,
+        "sub_quantity": 0.9,
+        "price": 3.41,
+        "attributes": {
+          "category": "21",
+          "pxq": "3.79"
+        },
+        "barcodes": [
+          "2042171000005"
+        ],
+        "ao_preferencias": [
+          "7"
+        ]
+      }
+    },
+    {
+      "currency": "EUR",
+      "hitType": "product",
+      "image": {
+        "alt": "Manojo de Plátanos Tropicales ",
+        "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dw0843f7a5/images/products/75/75_1.jpg",
+        "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dw0843f7a5/images/products/75/75_1.jpg",
+        "title": "Manojo de Plátanos Tropicales "
+      },
+      "price": 1.69,
+      "pricePerUnit": 1.99,
+      "productId": "75",
+      "productName": "Manojo de Plátanos Tropicales",
+      "productType": {
+        "item": true
+      },
+      "representedProduct": {
+        "id": "75"
+      },
+      "c_instaleapHit": {
+        "id": "75",
+        "name": "Manojo de Plátanos Tropicales",
+        "photo_url": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dw0843f7a5/images/products/75/75_1.jpg",
+        "unit": "KG",
+        "sub_unit": "KG",
+        "quantity": 0.85,
+        "sub_quantity": 0.85,
+        "price": 1.69,
+        "attributes": {
+          "category": "21",
+          "pxq": "1.99"
+        },
+        "barcodes": [
+          "2000075000002"
+        ],
+        "ao_preferencias": [
+          "7"
+        ]
+      }
+    },
+    {
+      "currency": "EUR",
+      "hitType": "product",
+      "image": {
+        "alt": "Manojo de Plátanos Canarios Essencials ",
+        "disBaseLink": "https://www.ametllerorigen.com/dw/image/v2/BLZV_PRD/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwf28900a0/images/products/20212/20212_1.jpg",
+        "link": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwf28900a0/images/products/20212/20212_1.jpg",
+        "title": "Manojo de Plátanos Canarios Essencials "
+      },
+      "price": 3.19,
+      "pricePerUnit": 3.19,
+      "productId": "20212",
+      "productName": "Manojo de Plátanos Canarios Essencials",
+      "productType": {
+        "item": true
+      },
+      "representedProduct": {
+        "id": "20212"
+      },
+      "c_instaleapHit": {
+        "id": "20212",
+        "name": "Manojo de Plátanos Canarios Essencials",
+        "photo_url": "https://www.ametllerorigen.com/on/demandware.static/-/Sites-mastercatalog_AMETLLER/default/dwf28900a0/images/products/20212/20212_1.jpg",
+        "unit": "KG",
+        "sub_unit": "KG",
+        "quantity": 1.0,
+        "sub_quantity": 1.0,
+        "price": 3.19,
+        "attributes": {
+          "category": "21",
+          "pxq": "3.19"
+        },
+        "barcodes": [
+          "8436607858843"
+        ],
+        "ao_preferencias": [
+          "7"
+        ]
+      }
+    }
+  ],
+  "query": "platano",
+  "refinements": [
+    {
+      "attributeId": "cgid",
+      "label": "Categoría",
+      "values": [
+        {
+          "hitCount": 161,
+          "label": "Colecciones",
+          "value": "900"
+        },
+        {
+          "hitCount": 5,
+          "label": "Despensa",
+          "value": "8"
+        },
+        {
+          "hitCount": 13,
+          "label": "ESSENCIALS",
+          "value": "15"
+        },
+        {
+          "hitCount": 10,
+          "label": "Fruta",
+          "value": "1"
+        },
+        {
+          "hitCount": 37,
+          "label": "Gourmet",
+          "value": "12"
+        },
+        {
+          "hitCount": 6,
+          "label": "Horno",
+          "value": "9"
+        },
+        {
+          "hitCount": 2,
+          "label": "Lácteos y huevos",
+          "value": "6"
+        },
+        {
+          "hitCount": 70,
+          "label": "Navidad",
+          "value": "Nadal"
+        },
+        {
+          "hitCount": 12,
+          "label": "Novedades",
+          "value": "NOVETATS"
+        },
+        {
+          "hitCount": 2,
+          "label": "Pescado",
+          "value": "5"
+        },
+        {
+          "hitCount": 364,
+          "label": "Platos cocinados",
+          "value": "7"
+        },
+        {
+          "hitCount": 20,
+          "label": "Promociones",
+          "value": "PROMOCIONS"
+        },
+        {
+          "hitCount": 3,
+          "label": "Sin Gluten",
+          "value": "83"
+        },
+        {
+          "hitCount": 6,
+          "label": "Veggie-productos",
+          "value": "4"
+        },
+        {
+          "hitCount": 2,
+          "label": "Verdura",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "attributeId": "price",
+      "label": "Precio",
+      "values": [
+        {
+          "hitCount": 387,
+          "label": "0.60 - 19.01",
+          "value": "(0..19)"
+        }
+      ]
+    },
+    {
+      "attributeId": "brand",
+      "label": "Marca",
+      "values": [
+        {
+          "hitCount": 2,
+          "label": "AMANDIN",
+          "value": "AMANDIN"
+        },
+        {
+          "hitCount": 229,
+          "label": "AMETLLER ORIGEN",
+          "value": "AMETLLER ORIGEN"
+        },
+        {
+          "hitCount": 1,
+          "label": "ANELA FRUITS",
+          "value": "ANELA FRUITS"
+        },
+        {
+          "hitCount": 6,
+          "label": "ANETO",
+          "value": "ANETO"
+        },
+        {
+          "hitCount": 7,
+          "label": "AO-5E",
+          "value": "AO-5E"
+        },
+        {
+          "hitCount": 11,
+          "label": "AO-SH",
+          "value": "AO-SH"
+        },
+        {
+          "hitCount": 1,
+          "label": "AROY-D",
+          "value": "AROY-D"
+        },
+        {
+          "hitCount": 3,
+          "label": "BANGER",
+          "value": "BANGER"
+        },
+        {
+          "hitCount": 2,
+          "label": "BERTONCELLO",
+          "value": "BERTONCELLO"
+        },
+        {
+          "hitCount": 1,
+          "label": "BIFFI",
+          "value": "BIFFI"
+        },
+        {
+          "hitCount": 2,
+          "label": "BIOCOP",
+          "value": "BIOCOP"
+        },
+        {
+          "hitCount": 1,
+          "label": "BRISAMAR",
+          "value": "BRISAMAR"
+        },
+        {
+          "hitCount": 5,
+          "label": "CAN BECH",
+          "value": "CAN BECH"
+        },
+        {
+          "hitCount": 2,
+          "label": "CARLIT",
+          "value": "CARLIT"
+        },
+        {
+          "hitCount": 2,
+          "label": "CASA NITA",
+          "value": "CASA NITA"
+        },
+        {
+          "hitCount": 2,
+          "label": "CASA TOC",
+          "value": "CASA TOC"
+        },
+        {
+          "hitCount": 10,
+          "label": "COLOMBO",
+          "value": "COLOMBO"
+        },
+        {
+          "hitCount": 2,
+          "label": "CUICK",
+          "value": "CUICK"
+        },
+        {
+          "hitCount": 1,
+          "label": "CUINA JUSTA",
+          "value": "CUINA JUSTA"
+        },
+        {
+          "hitCount": 1,
+          "label": "DANONINO",
+          "value": "DANONINO"
+        },
+        {
+          "hitCount": 2,
+          "label": "DELOUIS FILS",
+          "value": "DELOUIS FILS"
+        },
+        {
+          "hitCount": 1,
+          "label": "ESPINALER",
+          "value": "ESPINALER"
+        },
+        {
+          "hitCount": 14,
+          "label": "ESSENCIALS",
+          "value": "ESSENCIALS"
+        },
+        {
+          "hitCount": 6,
+          "label": "F.COLOMBO",
+          "value": "F.COLOMBO"
+        },
+        {
+          "hitCount": 2,
+          "label": "FARINA DI STRADA",
+          "value": "FARINA DI STRADA"
+        },
+        {
+          "hitCount": 3,
+          "label": "GALLINA BLANCA",
+          "value": "GALLINA BLANCA"
+        },
+        {
+          "hitCount": 1,
+          "label": "GRAGNANO",
+          "value": "GRAGNANO"
+        },
+        {
+          "hitCount": 5,
+          "label": "HEINZ",
+          "value": "HEINZ"
+        },
+        {
+          "hitCount": 3,
+          "label": "HELLMANN'S",
+          "value": "HELLMANN'S"
+        },
+        {
+          "hitCount": 1,
+          "label": "HORT DEL PAGÈS",
+          "value": "HORT DEL PAGÈS"
+        },
+        {
+          "hitCount": 22,
+          "label": "JUBANY",
+          "value": "JUBANY"
+        },
+        {
+          "hitCount": 2,
+          "label": "LA COSA NOSTRA",
+          "value": "LA COSA NOSTRA"
+        },
+        {
+          "hitCount": 1,
+          "label": "LA GRANJA",
+          "value": "LA GRANJA"
+        },
+        {
+          "hitCount": 1,
+          "label": "MACALLI",
+          "value": "MACALLI"
+        },
+        {
+          "hitCount": 1,
+          "label": "MAILLE",
+          "value": "MAILLE"
+        },
+        {
+          "hitCount": 3,
+          "label": "MARTIKO",
+          "value": "MARTIKO"
+        },
+        {
+          "hitCount": 3,
+          "label": "MASDEU",
+          "value": "MASDEU"
+        },
+        {
+          "hitCount": 2,
+          "label": "MUÑIDO & G.",
+          "value": "MUÑIDO & G."
+        },
+        {
+          "hitCount": 1,
+          "label": "OATLY",
+          "value": "OATLY"
+        },
+        {
+          "hitCount": 1,
+          "label": "PICHOTTI",
+          "value": "PICHOTTI"
+        },
+        {
+          "hitCount": 1,
+          "label": "SALT DE SALLENT",
+          "value": "SALT DE SALLENT"
+        },
+        {
+          "hitCount": 1,
+          "label": "SANTA TERESA",
+          "value": "SANTA TERESA"
+        },
+        {
+          "hitCount": 1,
+          "label": "SM",
+          "value": "SM"
+        },
+        {
+          "hitCount": 1,
+          "label": "SMILEAT",
+          "value": "SMILEAT"
+        },
+        {
+          "hitCount": 1,
+          "label": "TABASCO",
+          "value": "TABASCO"
+        },
+        {
+          "hitCount": 5,
+          "label": "TOSSINI",
+          "value": "TOSSINI"
+        },
+        {
+          "hitCount": 1,
+          "label": "TQH",
+          "value": "TQH"
+        },
+        {
+          "hitCount": 2,
+          "label": "VACOOK",
+          "value": "VACOOK"
+        }
+      ]
+    },
+    {
+      "attributeId": "c_ao_preferencias",
+      "label": "Preferencias",
+      "values": [
+        {
+          "hitCount": 36,
+          "label": "Apto veganos",
+          "value": "2"
+        },
+        {
+          "hitCount": 19,
+          "label": "Bajo contenido en sodio/sal",
+          "value": "4"
+        },
+        {
+          "hitCount": 21,
+          "label": "Bajo en grasas",
+          "value": "27"
+        },
+        {
+          "hitCount": 6,
+          "label": "Cortado al momento",
+          "value": "13"
+        },
+        {
+          "hitCount": 4,
+          "label": "Ecológico",
+          "value": "28"
+        },
+        {
+          "hitCount": 7,
+          "label": "Producto al peso",
+          "value": "7"
+        },
+        {
+          "hitCount": 140,
+          "label": "Producto refrigerado",
+          "value": "8"
+        },
+        {
+          "hitCount": 38,
+          "label": "Sin aditivos",
+          "value": "21"
+        },
+        {
+          "hitCount": 44,
+          "label": "Sin azúcares añadido",
+          "value": "12"
+        },
+        {
+          "hitCount": 49,
+          "label": "Sin carne o productos cárnicos",
+          "value": "29"
+        },
+        {
+          "hitCount": 44,
+          "label": "Sin gluten",
+          "value": "10"
+        },
+        {
+          "hitCount": 47,
+          "label": "Sin lactosa",
+          "value": "11"
+        },
+        {
+          "hitCount": 68,
+          "label": "Sin pescado o producto pesca",
+          "value": "22"
+        }
+      ]
+    }
+  ],
+  "searchPhraseSuggestions": {
+    "suggestedPhrases": [
+      {
+        "exactMatch": true,
+        "phrase": "platano"
+      }
+    ],
+    "suggestedTerms": [
+      {
+        "originalTerm": "platano",
+        "terms": [
+          {
+            "completed": false,
+            "corrected": false,
+            "exactMatch": true,
+            "value": "platano"
+          }
+        ]
+      }
+    ]
+  },
+  "sortingOptions": [
+    {
+      "id": "Price-Ascending",
+      "label": "Precio: menor a mayor"
+    },
+    {
+      "id": "Price-Descending",
+      "label": "Precio: mayor a menor"
+    },
+    {
+      "id": "Name-AZ",
+      "label": "Alfabético: A-Z"
+    },
+    {
+      "id": "Name-ZA",
+      "label": "Alfabético: Z-A"
+    },
+    {
+      "id": "Most-Viewed",
+      "label": "Más vistos"
+    },
+    {
+      "id": "Best-Sellers",
+      "label": "Más vendidos"
+    },
+    {
+      "id": "New-In",
+      "label": "Fecha de publicación"
+    }
+  ],
+  "offset": 0,
+  "total": 387
+}

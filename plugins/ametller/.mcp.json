@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ametller": {
+      "command": "/bin/sh",
+      "args": ["./scripts/launch.sh"],
+      "cwd": "."
+    }
+  }
+}
