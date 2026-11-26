@@ -17,6 +17,10 @@ pub enum Error {
     #[error("Could not access the private local state. Check its owner and permissions.")]
     Storage,
     #[error(
+        "Could not read or update the private purchase-history database. No automatic reset was attempted."
+    )]
+    HistoryStorage,
+    #[error(
         "Keychain access failed. Unlock your login Keychain or explicitly choose --credential-store file."
     )]
     Keychain,

@@ -4,6 +4,7 @@ pub mod api;
 pub mod auth;
 pub mod cart;
 pub mod error;
+pub mod history;
 pub mod mcp;
 pub mod photos;
 pub mod service;

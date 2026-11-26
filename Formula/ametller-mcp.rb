@@ -1,8 +1,8 @@
 class AmetllerMcp < Formula
   desc "Local Ametller grocery catalog and cart MCP server"
   homepage "https://github.com/gilboz/ametller-mcp"
-  url "https://github.com/gilboz/ametller-mcp.git", tag: "v0.1.0-beta.4"
-  version "0.1.0-beta.4"
+  url "https://github.com/gilboz/ametller-mcp.git", tag: "v0.1.0-beta.5"
+  version "0.1.0-beta.5"
   license "MIT"
 
   depends_on "rust" => :build
@@ -34,7 +34,7 @@ class AmetllerMcp < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/ametller-mcp --version")
     capabilities = JSON.parse(shell_output("#{bin}/ametller-mcp capabilities"))
-    assert_equal 5, capabilities.fetch("tools").length
+    assert_equal 8, capabilities.fetch("tools").length
     assert_includes capabilities.fetch("tools"), "set_cart_item"
   end
 end

@@ -1,5 +1,32 @@
 # Verification record
 
+## Local order-history cache — 26 November 2026
+
+Development build `0.1.0-beta.5` adds account-scoped SQLite history, bounded and
+resumable GET-only online-order refresh, cached order/line reads and frequent or
+recent product queries. Source contracts were checked against the captured
+frontend SDK and both Node/Python reference clients. In-store receipt emails
+remain a separate source.
+
+All 47 Rust tests pass with strict Clippy and formatting, including ten history
+regressions: paging/resume, failed pages, repeated pages, detail/account binding,
+exact/unknown totals, PII exclusion, account files/permissions, rollback during
+line insertion and commit, renamed products, and empty versus missing history.
+An independent reviewer identified three P2 issues; the cursor now advances only
+after commit, product-name matching retains the complete product history, and a
+missing order total stays unknown rather than becoming a subtotal.
+
+One read-only live contract helper was stopped while waiting on macOS Keychain
+approval. It did not produce account/order data. Real-account synchronization
+therefore remains unverified until the installed executable can access the
+already saved Keychain session. No test cart mutations, purchase submissions or
+new login credentials were used.
+
+The build is being prepared locally. Another GitHub publication is deferred
+while the user's earlier private-repository requirement conflicts with the
+repository's currently public visibility. Do not describe this build as a
+published release or claim CI passed for it before that publication occurs.
+
 ## Embedded photos and Claude desktop bundle — 26 November 2026
 
 Version `0.1.0-beta.4` changes the MCP tool contract: product tools now include

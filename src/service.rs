@@ -1,7 +1,7 @@
 use crate::{
     Error, Result,
     api::{Api, id, validate_locale},
-    auth, cart,
+    auth, cart, history,
     store::Store,
 };
 use reqwest::Method;
@@ -59,8 +59,56 @@ impl App {
         let _lock = self.store.lock().await?;
         self.store.delete()?;
         Ok(
-            json!({"authenticated":false,"local_credentials_removed":true,"remote_session_revoked":false}),
+            json!({"authenticated":false,"local_credentials_removed":true,"remote_session_revoked":false,"history_cache_retained":true}),
         )
+    }
+    pub async fn sync_history(&self, max_pages: u32, restart: bool) -> Result<Value> {
+        if !(1..=100).contains(&max_pages) {
+            return Err(Error::Input("max_pages must be 1-100."));
+        }
+        let _lock = self.store.lock().await?;
+        if !self.store.has_session()? {
+            return Err(Error::LoginRequired);
+        }
+        let api = Api::discover(&self.locale).await?;
+        let session = auth::registered(&api, &self.store).await?;
+        history::sync(&api, &session, &self.store, max_pages, restart).await
+    }
+    pub async fn purchase_history(
+        &self,
+        order_id: Option<&str>,
+        limit: u32,
+        offset: u32,
+    ) -> Result<Value> {
+        if !self.store.has_session()? {
+            return Err(Error::LoginRequired);
+        }
+        let _lock = self.store.lock().await?;
+        let customer = history::cached_account(&self.store)?;
+        history::orders(&self.store, &customer, order_id, limit, offset)
+    }
+    pub async fn purchased_products(
+        &self,
+        query: &str,
+        sort: &str,
+        limit: u32,
+        offset: u32,
+    ) -> Result<Value> {
+        if !self.store.has_session()? {
+            return Err(Error::LoginRequired);
+        }
+        let _lock = self.store.lock().await?;
+        let customer = history::cached_account(&self.store)?;
+        history::products(&self.store, &customer, query, sort, limit, offset)
+    }
+    pub async fn clear_history(&self) -> Result<Value> {
+        if !self.store.has_session()? {
+            return Err(Error::LoginRequired);
+        }
+        let _lock = self.store.lock().await?;
+        let customer = history::cached_account(&self.store)?;
+        history::clear(&self.store, &customer)?;
+        Ok(json!({"local_history_removed":true,"remote_orders_modified":false}))
     }
     pub async fn search(&self, query: &str, limit: u32, offset: u32) -> Result<Value> {
         if query.trim().is_empty()

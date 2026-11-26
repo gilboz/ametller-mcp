@@ -54,7 +54,7 @@ fn real_stdio_protocol_is_clean_and_discovery_is_offline() {
     );
     let list = receive();
     let tools = list["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), 5);
+    assert_eq!(tools.len(), 8);
     send(
         &mut input,
         json!({"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"authentication_status","arguments":{}}}),

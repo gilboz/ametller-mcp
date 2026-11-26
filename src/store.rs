@@ -311,7 +311,7 @@ fn reject_symlink(path: &Path) -> Result<()> {
         Err(_) => Err(Error::Storage),
     }
 }
-fn check_private(path: &Path, directory: bool) -> Result<()> {
+pub(crate) fn check_private(path: &Path, directory: bool) -> Result<()> {
     let metadata = fs::symlink_metadata(path).map_err(|_| Error::Storage)?;
     if metadata.file_type().is_symlink()
         || metadata.is_dir() != directory

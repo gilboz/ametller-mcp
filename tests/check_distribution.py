@@ -18,7 +18,8 @@ EXPECTED_FILES = {
     'ametller/.codex-plugin/plugin.json', 'ametller/.mcp.json',
     'ametller/scripts/launch.sh', 'ametller/skills/setup/SKILL.md',
 }
-TOOLS = {'authentication_status', 'search_products', 'get_product', 'get_cart', 'set_cart_item'}
+TOOLS = {'authentication_status', 'search_products', 'get_product', 'get_cart', 'set_cart_item',
+         'sync_purchase_history', 'get_purchase_history', 'get_purchased_products'}
 
 
 class RpcProcess:

@@ -1,5 +1,6 @@
 # Ametller MCP documentation
 
+- [Purchase history](history.md): account-scoped SQLite, refresh/resume, cached reads and retention.
 - [Usage](usage.md): private sign-in, catalog/cart commands and uncertain writes.
 - [Installation](installation.md): private Cargo, Homebrew and Codex plugin packages.
 - [Claude desktop setup](claude-desktop.md): install the native `.mcpb` and reuse local sign-in.

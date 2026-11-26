@@ -6,8 +6,8 @@ Sign in privately through a terminal prompt, then use direct API calls for
 shopping. No browser installation or automation is required. There is no
 checkout/payment tool or background service.
 
-Private repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-The current release is `0.1.0-beta.4`. Product tools return embedded image content
+Repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
+The current development version is `0.1.0-beta.5`. Product tools return embedded image content
 alongside structured product data and original photo URLs. See
 [verification](docs/verification.md) for the checks performed and remaining limits.
 
@@ -17,8 +17,8 @@ alongside structured product data and original photo URLs. See
 
 On an **Apple Silicon Mac** (M1 or later):
 
-1. Download `ametller-0.1.0-beta.4-macos-arm64.mcpb` from the private
-   [release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.4).
+1. Download `ametller-0.1.0-beta.5-macos-arm64.mcpb` from the
+   [release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.5).
 2. Double-click it and choose **Install** in Claude. Alternatively, use **Settings
    → Desktop app → Extensions → Manage → Advanced settings → Install Extension…**
    (older versions: **Settings → Extensions**).
@@ -40,7 +40,7 @@ codex plugin marketplace add gilboz/ametller-mcp --ref main
 codex plugin add ametller@ametller-mcp
 ```
 
-The repository is private, so GitHub access is required. Cargo and source archive
+If repository access is restricted, sign into GitHub before downloading. Cargo and source archive
 installation, plugin connection and removal are in [installation](docs/installation.md).
 Nothing signs in or modifies your cart during installation.
 
@@ -61,13 +61,16 @@ tool parameter. On macOS, session credentials use
 Keychain by default; an explicit file backend is available and uses private
 permissions, not encryption. See [usage](docs/usage.md).
 
-The MCP exposes five tools:
+The MCP exposes eight tools:
 
 | Tool | Purpose |
 | --- | --- |
 | `authentication_status` | Report whether this local installation has saved account authentication. |
 | `search_products` | Search the live guest catalog with embedded photos, pack sizes and price context. |
 | `get_product` | Read a product's description, photos, availability and purchase-quantity rules. |
+| `sync_purchase_history` | Refresh online order history into the private local SQLite cache; resume incomplete batches. |
+| `get_purchase_history` | Read cached orders and their product lines without backend requests. |
+| `get_purchased_products` | Find recent or frequent previously ordered products for repeat-shopping suggestions. |
 | `get_cart` | Read the registered account's cart; an absent cart stays absent. |
 | `set_cart_item` | Set a selected product/line to an absolute quantity; zero removes it. |
 
@@ -77,6 +80,33 @@ returned cart is a reviewable estimate, not an order: delivery, final weighed
 prices and payment are completed on the official website. Standard MCP image
 blocks carry the actual photo bytes; the host decides how to present them. A
 custom shopping carousel is not bundled. CLI commands continue to return JSON.
+
+## Purchase history and repeat shopping
+
+```sh
+ametller-mcp sync-history
+ametller-mcp history
+ametller-mcp history --order-id ORDER_ID_FROM_HISTORY
+ametller-mcp purchased-products yogur --sort frequent
+```
+
+`sync-history` fetches the account's online orders with read-only requests and
+upserts them into an account-specific SQLite database in the private application
+state directory. Ordinary history/product-history reads use only that database;
+they do not contact Ametller or read Keychain credentials. Each response includes
+cache freshness and completeness. Repeat sync calls resume page/time-limited
+batches; `--restart` starts a new traversal if the backend history changed.
+
+This covers **online orders available through Ametller's API**. In-store receipt
+emails are a separate source and are not imported here. Historical prices and
+quantities do not establish today's price, stock or refill needs. Use current
+product details before applying user-selected cart changes.
+
+The cache stores normalized product lines and order summaries, not raw checkout
+payloads, addresses, payment data or tokens. SQLite files use owner-only access;
+they are not database-encrypted. Logout retains this purchase log. Run
+`ametller-mcp clear-history` while connected to explicitly delete that account's
+local history without changing remote orders. See [history details](docs/history.md).
 
 ## Development
 

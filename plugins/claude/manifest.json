@@ -2,24 +2,39 @@
   "manifest_version": "0.3",
   "name": "ametller",
   "display_name": "Ametller (Apple Silicon)",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "description": "Find Ametller groceries with photos and manage your shopping cart.",
-  "long_description": "Local Rust MCP for macOS on Apple Silicon. Browse products with embedded photos, compare pack sizes and estimated prices, and change your cart when requested. Reuses the local Ametller CLI session in macOS Keychain. Guest browsing works before login. Checkout and payment remain on Ametller's website. No browser, Homebrew, or language runtime is required to run this bundle.",
-  "author": { "name": "gilboz" },
-  "repository": { "type": "git", "url": "https://github.com/gilboz/ametller-mcp" },
+  "long_description": "Local Rust MCP for macOS on Apple Silicon. Browse products with embedded photos, compare pack sizes and estimated prices, browse cached online purchase history, and change your cart when requested. Reuses the local Ametller CLI session in macOS Keychain. Guest browsing works before login. Checkout and payment remain on Ametller's website. No browser, Homebrew, or language runtime is required to run this bundle.",
+  "author": {
+    "name": "gilboz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gilboz/ametller-mcp"
+  },
   "documentation": "https://github.com/gilboz/ametller-mcp/blob/main/docs/claude-desktop.md",
   "support": "https://github.com/gilboz/ametller-mcp/issues",
   "license": "MIT",
-  "privacy_policies": ["https://ametllerorigen.com/es/content/politicadeprivacitat"],
+  "privacy_policies": [
+    "https://ametllerorigen.com/es/content/politicadeprivacitat"
+  ],
   "server": {
     "type": "binary",
     "entry_point": "server/ametller-mcp",
     "mcp_config": {
       "command": "${__dirname}/server/ametller-mcp",
-      "args": ["--locale", "${user_config.locale}", "serve"]
+      "args": [
+        "--locale",
+        "${user_config.locale}",
+        "serve"
+      ]
     }
   },
-  "compatibility": { "platforms": ["darwin"] },
+  "compatibility": {
+    "platforms": [
+      "darwin"
+    ]
+  },
   "user_config": {
     "locale": {
       "type": "string",
@@ -30,10 +45,37 @@
     }
   },
   "tools": [
-    { "name": "authentication_status", "description": "Check the locally saved Ametller connection." },
-    { "name": "search_products", "description": "Find groceries with embedded photos, pack sizes and estimated prices." },
-    { "name": "get_product", "description": "Inspect one product, its photo, description and quantity rules." },
-    { "name": "get_cart", "description": "Read the actual cart without creating a basket." },
-    { "name": "set_cart_item", "description": "Set an explicitly selected item's cart quantity; no checkout or payment." }
+    {
+      "name": "authentication_status",
+      "description": "Check the locally saved Ametller connection."
+    },
+    {
+      "name": "search_products",
+      "description": "Find groceries with embedded photos, pack sizes and estimated prices."
+    },
+    {
+      "name": "get_product",
+      "description": "Inspect one product, its photo, description and quantity rules."
+    },
+    {
+      "name": "get_cart",
+      "description": "Read the actual cart without creating a basket."
+    },
+    {
+      "name": "set_cart_item",
+      "description": "Set an explicitly selected item's cart quantity; no checkout or payment."
+    },
+    {
+      "name": "sync_purchase_history",
+      "description": "Refresh online order history into the private local SQLite cache."
+    },
+    {
+      "name": "get_purchase_history",
+      "description": "Read cached past orders and product lines without backend requests."
+    },
+    {
+      "name": "get_purchased_products",
+      "description": "Find recent or frequent previously ordered products from the local cache."
+    }
   ]
 }

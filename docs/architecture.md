@@ -15,10 +15,11 @@ CLI / MCP -> service -> catalog and cart operations -> pinned SCAPI proxy
 | Module | Responsibility |
 | --- | --- |
 | `main` | Commands, hidden terminal login prompt and JSON output. |
-| `mcp` | Five tool schemas, annotations, result handling and stdio transport. |
+| `mcp` | Eight tool schemas, annotations, result handling and stdio transport. |
 | `service` | Guest/account workflows and normalized product output. |
 | `api` | Public configuration discovery, fixed HTTPS origins, parameter validation, request timeouts and bounded bodies. |
 | `auth` | Guest and registered PKCE, account validation and refresh rotation. |
+| `history` | Read-only online order sync, account-scoped SQLite and offline purchase queries. |
 | `photos` | Public-only image downloads, bounded decoding/thumbnails, and MCP image blocks. |
 | `store` | Keychain/file credentials, private atomic state files and cross-process lock. |
 | `cart` | Active basket discovery, exact quantity validation, mutations and uncertain-outcome reconciliation. |
@@ -95,6 +96,36 @@ There is no checkout, order submission, payment, delivery reservation, coupon
 activation, address mutation or automatic substitution. Explicitly requested cart
 changes use the host's normal tool controls. Suggestions are previewed before
 adding. A model-supplied confirmation flag is not used as an authorization gate.
+
+## Purchase-history cache
+
+Online order summaries and normalized product lines use a separate SQLite file
+per account, named by the SHA-256 of the customer ID under the state directory.
+The database also binds its account identity in metadata. Owner-only permissions,
+symlink/hardlink checks and SQLite NOFOLLOW protect the database and sidecars.
+SQLite is bundled into the Rust executable; no external SQLite service is needed.
+Raw order payloads, personal addresses, payment details and tokens are not stored.
+
+Sync uses authenticated GET requests to customer orders and, only when a listing
+omits product lines, the corresponding order-detail endpoint. Fifty-order pages
+have a bounded per-call page/time budget and a 10,000-order traversal cap. Each
+order, its replacement lines and the next offset commit atomically. Only after a
+successful commit does the in-memory cursor advance. Failures retain earlier
+committed work. Duplicate pages, inconsistent totals and wrong-account details
+fail closed; completion is never inferred from a failed or truncated page.
+
+Cached order/product reads access metadata and SQLite, not Keychain or network.
+They include completeness, timestamps and refresh guidance. Cancelled, failed
+and unknown statuses remain in the order log but do not contribute repeat-product
+suggestions. Name matching finds product IDs first, then uses every eligible
+historical row for those IDs to keep counts and latest details correct after
+renaming/localization. Unknown monetary values remain null; a product subtotal
+is not substituted for the complete order total. Decimal quantities/prices are
+stored as text to avoid floating-point rounding.
+
+Logout retains history; the local `clear-history` command removes only the
+connected account's database. Cached history never authorizes a cart mutation.
+See [history](history.md) for coverage and retention limits.
 
 ## Shared conventions and packaging
 

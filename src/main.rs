@@ -59,6 +59,36 @@ enum Command {
     Product {
         product_id: String,
     },
+    /// Synchronize online orders into the private SQLite cache; never changes orders.
+    SyncHistory {
+        #[arg(long, default_value_t = 5)]
+        max_pages: u32,
+        /// Start again from the newest page instead of resuming incomplete work.
+        #[arg(long)]
+        restart: bool,
+    },
+    /// Read cached orders without contacting Ametller or reading Keychain secrets.
+    History {
+        #[arg(long)]
+        order_id: Option<String>,
+        #[arg(long, default_value_t = 20)]
+        limit: u32,
+        #[arg(long, default_value_t = 0)]
+        offset: u32,
+    },
+    /// Find products in cached non-cancelled orders, for repeat-shopping suggestions.
+    PurchasedProducts {
+        #[arg(default_value = "")]
+        query: String,
+        #[arg(long, default_value = "frequent", value_parser=["frequent","recent"])]
+        sort: String,
+        #[arg(long, default_value_t = 20)]
+        limit: u32,
+        #[arg(long, default_value_t = 0)]
+        offset: u32,
+    },
+    /// Delete only this connected account's local order cache; remote orders stay intact.
+    ClearHistory,
     /// Read the account cart; never creates a basket.
     Cart {
         /// Manually unblock an uncertain write after inspecting the official cart.
@@ -131,6 +161,22 @@ async fn run() -> Result<()> {
             offset,
         } => app.search(&query, limit, offset).await?,
         Command::Product { product_id } => app.product(&product_id).await?,
+        Command::SyncHistory { max_pages, restart } => app.sync_history(max_pages, restart).await?,
+        Command::History {
+            order_id,
+            limit,
+            offset,
+        } => {
+            app.purchase_history(order_id.as_deref(), limit, offset)
+                .await?
+        }
+        Command::PurchasedProducts {
+            query,
+            sort,
+            limit,
+            offset,
+        } => app.purchased_products(&query, &sort, limit, offset).await?,
+        Command::ClearHistory => app.clear_history().await?,
         Command::Cart { clear_uncertain } => app.cart(clear_uncertain).await?,
         Command::SetCartItem {
             product_id,

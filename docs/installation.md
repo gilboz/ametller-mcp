@@ -1,15 +1,15 @@
 # Installation
 
-The private repository is [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
+The repository is [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
 For Claude Desktop on an Apple Silicon Mac, install the self-contained `.mcpb`
 from the release: see [Claude desktop setup](claude-desktop.md). For Codex or other
 stdio clients, install the Rust executable with Cargo or Homebrew. Login uses a
 hidden terminal password prompt and direct HTTPS requests. No browser or
 background service is required.
 
-## Private GitHub access
+## GitHub access
 
-Reuse existing GitHub authentication. On a new machine, `gh auth login` and
+If the repository is private, reuse existing GitHub authentication. On a new machine, `gh auth login` and
 `gh auth setup-git` configure access for private HTTPS Git downloads. Never put
 a token into a repository URL or the formula. Homebrew supports the GitHub CLI
 credential helper for private Git sources; see [Homebrew's guidance](https://docs.brew.sh/FAQ#how-do-i-authenticate-private-git-source-downloads).
@@ -21,7 +21,7 @@ brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
 brew install gilboz/ametller-mcp/ametller-mcp
 ```
 
-This repository is also the private tap. The formula builds `v0.1.0-beta.4` from
+This repository is also the private tap. The formula builds `v0.1.0-beta.5` from
 source with locked dependencies. It does not include a prebuilt bottle or sign
 into Ametller during installation.
 
@@ -32,7 +32,7 @@ Requires Rust 1.100 or newer and a working platform linker:
 ```sh
 CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install \
   --git https://github.com/gilboz/ametller-mcp.git \
-  --tag v0.1.0-beta.4 --locked ametller-mcp
+  --tag v0.1.0-beta.5 --locked ametller-mcp
 ```
 
 From a trusted checkout, `cargo install --path . --locked` also works. The release

@@ -1,5 +1,23 @@
 # Independent review iterations
 
+## Local order-history cache — 26 November 2026
+
+Root implemented the cache and integration. Independent reviewer
+`history_cache_review` found three P2 issues, each fixed and regression-tested:
+
+1. A failed COMMIT could leave the in-memory cursor ahead of the rolled-back
+   order. Cursor state is now staged and published only after successful commit.
+2. Filtering names before aggregation lost frequency/latest details after a
+   product rename. Matching now selects product IDs while aggregation uses their
+   complete eligible history.
+3. A product subtotal could be mislabeled as a full order total. Missing order
+   totals now remain null.
+
+The reviewer confirmed no remaining correctness blockers and independently ran
+ten history tests and strict Clippy. The full local suite passes 47 tests. Live
+history still needs the existing Keychain session to be accessible to the new
+installed executable; mocked success is not live account validation.
+
 ## Embedded photos and Claude desktop bundle — 26 November 2026
 
 Implementer `embedded_product_images` added the Rust photo pipeline, protocol

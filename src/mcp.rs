@@ -17,6 +17,9 @@ pub const TOOL_NAMES: &[&str] = &[
     "authentication_status",
     "search_products",
     "get_product",
+    "sync_purchase_history",
+    "get_purchase_history",
+    "get_purchased_products",
     "get_cart",
     "set_cart_item",
 ];
@@ -50,6 +53,44 @@ struct Product {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Empty {}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SyncHistory {
+    #[serde(default = "default_pages")]
+    max_pages: u32,
+    #[serde(default)]
+    restart: bool,
+}
+fn default_pages() -> u32 {
+    5
+}
+fn history_limit() -> u32 {
+    20
+}
+fn history_sort() -> String {
+    "frequent".into()
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct History {
+    order_id: Option<String>,
+    #[serde(default = "history_limit")]
+    limit: u32,
+    #[serde(default)]
+    offset: u32,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PurchasedProducts {
+    #[serde(default)]
+    query: String,
+    #[serde(default = "history_sort")]
+    sort: String,
+    #[serde(default = "history_limit")]
+    limit: u32,
+    #[serde(default)]
+    offset: u32,
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SetItem {
@@ -93,6 +134,27 @@ fn definitions() -> Vec<Tool> {
             true,
         ),
         (
+            "sync_purchase_history",
+            "Refresh the private local SQLite cache from authenticated online order history. GET-only order requests; never changes orders or cart. Upserts bounded pages, resumes interrupted work, and reports coverage/freshness. Call again for page_budget/time_budget stops; order_limit is a hard 10,000-order traversal cap, not a resumable budget. restart=true starts at the newest page if pagination changed. Does not include in-store receipt emails. Other history tools read only this cache.",
+            json!({"max_pages":{"type":"integer","minimum":1,"maximum":100,"default":5},"restart":{"type":"boolean","default":false}}),
+            json!([]),
+            true,
+        ),
+        (
+            "get_purchase_history",
+            "Read cached online orders without backend requests or Keychain access. Provide a cached order_id to read its product lines. Includes cache age and completeness; an unpopulated cache is not evidence of no purchases. Prices and statuses are historical. Refresh explicitly with sync_purchase_history. No cart change is performed.",
+            json!({"order_id":{"type":"string","minLength":1,"maxLength":150},"limit":{"type":"integer","minimum":1,"maximum":50,"default":20},"offset":{"type":"integer","minimum":0,"maximum":10000,"default":0}}),
+            json!([]),
+            true,
+        ),
+        (
+            "get_purchased_products",
+            "Find previously ordered products in local SQLite, sorted by frequency or recency. No backend/image requests or Keychain access. Only new/open/completed orders contribute; cancelled/failed and unknown statuses are excluded. These are repeat-shopping suggestions, not proof that anything is due or currently available. Check live product details and get the user's product/quantity choice before changing the cart.",
+            json!({"query":{"type":"string","maxLength":200},"sort":{"type":"string","enum":["frequent","recent"],"default":"frequent"},"limit":{"type":"integer","minimum":1,"maximum":50,"default":20},"offset":{"type":"integer","minimum":0,"maximum":10000,"default":0}}),
+            json!([]),
+            true,
+        ),
+        (
             "set_cart_item",
             "Set the user's explicitly selected product or cart line to the desired absolute quantity; zero removes it. Never infer a product choice or treat a suggested shopping list as an instruction to add. Supply item_id for duplicate lines. Validates purchase units and refuses special/reservation items. Returns the actual cart for review. Never submits checkout or payment. Do not retry uncertain writes: use get_cart to inspect.",
             json!({"product_id":{"type":"string","minLength":1,"maxLength":150},"quantity":{"type":"string","pattern":"^[0-9]+(\\.[0-9]+)?$","description":"Absolute purchase-unit quantity, not approximate weight; zero removes."},"item_id":{"type":"string","minLength":1,"maxLength":150}}),
@@ -122,6 +184,22 @@ impl Server {
             "get_product" => {
                 let p: Product = parse(input)?;
                 self.app.product(&p.product_id).await
+            }
+            "sync_purchase_history" => {
+                let p: SyncHistory = parse(input)?;
+                self.app.sync_history(p.max_pages, p.restart).await
+            }
+            "get_purchase_history" => {
+                let p: History = parse(input)?;
+                self.app
+                    .purchase_history(p.order_id.as_deref(), p.limit, p.offset)
+                    .await
+            }
+            "get_purchased_products" => {
+                let p: PurchasedProducts = parse(input)?;
+                self.app
+                    .purchased_products(&p.query, &p.sort, p.limit, p.offset)
+                    .await
             }
             "get_cart" => {
                 let _: Empty = parse(input)?;
@@ -182,5 +260,5 @@ pub async fn serve(app: App) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"name":"ametller-mcp","version":env!("CARGO_PKG_VERSION"),"transport":"stdio","tools":TOOL_NAMES,"authentication":"private_cli_pkce","checkout":false,"browser_login":false,"embedded_product_photos":{"content_type":"image","mime_type":"image/jpeg","search_limit":crate::photos::MAX_SEARCH_PHOTOS,"detail_limit":crate::photos::MAX_DETAIL_PHOTOS,"maximum_image_bytes":crate::photos::MAX_PREVIEW_BYTES,"maximum_total_base64_bytes":crate::photos::MAX_TOTAL_BASE64_BYTES,"rendering":"host_dependent"}})
+    json!({"name":"ametller-mcp","version":env!("CARGO_PKG_VERSION"),"transport":"stdio","tools":TOOL_NAMES,"authentication":"private_cli_pkce","checkout":false,"browser_login":false,"embedded_product_photos":{"content_type":"image","mime_type":"image/jpeg","search_limit":crate::photos::MAX_SEARCH_PHOTOS,"detail_limit":crate::photos::MAX_DETAIL_PHOTOS,"maximum_image_bytes":crate::photos::MAX_PREVIEW_BYTES,"maximum_total_base64_bytes":crate::photos::MAX_TOTAL_BASE64_BYTES,"rendering":"host_dependent"},"purchase_history":{"storage":"local_sqlite","coverage":"online_orders_only","cached_reads_offline":true,"sync_tool":"sync_purchase_history"}})
 }
