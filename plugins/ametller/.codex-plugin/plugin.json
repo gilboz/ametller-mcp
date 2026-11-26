@@ -1,6 +1,6 @@
 {
   "name": "ametller",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "Browse Ametller products and manage your grocery cart through a local Rust MCP.",
   "author": {
     "name": "gilboz"
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Ametller",
     "shortDescription": "Find groceries and prepare your Ametller cart",
-    "longDescription": "Search the live catalog, compare photos and pack sizes, and update your real cart when requested. Sign in on the official website through an isolated Chrome window; review and pay on Ametller.",
+    "longDescription": "Search the live catalog, compare photos and pack sizes, and update your real cart when requested. Sign in privately through the local terminal prompt; review and pay on Ametller.",
     "developerName": "gilboz",
     "category": "Productivity",
     "capabilities": [

@@ -84,16 +84,17 @@ fn real_stdio_protocol_is_clean_and_discovery_is_offline() {
 #[test]
 fn credentials_cannot_be_piped_or_passed_as_arguments() {
     let temp = tempfile::tempdir().unwrap();
-    let output = Command::new(env!("CARGO_BIN_EXE_ametller-mcp"))
-        .args(["--credential-store", "file", "--state-dir"])
-        .arg(temp.path().join("state"))
-        .arg("login")
-        .arg("--password")
-        .stdin(Stdio::null())
-        .output()
-        .unwrap();
-    assert!(!output.status.success());
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("interactive terminal"));
-    assert!(!temp.path().join("state").exists());
+    for args in [vec!["login"], vec!["login", "--password"]] {
+        let output = Command::new(env!("CARGO_BIN_EXE_ametller-mcp"))
+            .args(["--credential-store", "file", "--state-dir"])
+            .arg(temp.path().join("state"))
+            .args(args)
+            .stdin(Stdio::null())
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        assert!(output.stdout.is_empty());
+        assert!(String::from_utf8_lossy(&output.stderr).contains("interactive terminal"));
+        assert!(!temp.path().join("state").exists());
+    }
 }

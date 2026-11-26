@@ -36,10 +36,10 @@ enum Command {
     Serve,
     /// Print offline capabilities.
     Capabilities,
-    /// Sign in on the official website in an isolated Chrome window.
+    /// Sign in directly with terminal-only email and hidden password prompts.
     Login {
-        /// Use direct API login with terminal-only email and hidden password instead.
-        #[arg(long)]
+        /// Compatibility flag; all login commands now use the terminal prompt.
+        #[arg(long, hide = true)]
         password: bool,
     },
     /// Delete local credentials; does not remotely revoke the session.
@@ -119,13 +119,9 @@ async fn run() -> Result<()> {
     let output = match cli.command.unwrap_or(Command::Serve) {
         Command::Serve => return mcp::serve(app).await,
         Command::Capabilities => unreachable!(),
-        Command::Login { password } => {
-            if password {
-                let (email, password) = credentials()?;
-                app.login(&email, &password).await?
-            } else {
-                app.login_browser().await?
-            }
+        Command::Login { .. } => {
+            let (email, password) = credentials()?;
+            app.login(&email, &password).await?
         }
         Command::Logout => app.logout().await?,
         Command::Status { live } => app.status(live).await?,

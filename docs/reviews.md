@@ -1,5 +1,15 @@
 # Independent review iterations
 
+## CLI login correction — 26 November 2026
+
+Root removed the Chrome helper, restored terminal login and corrected the
+customer/custom query parameters. Fresh reviewer `cli_login_fix_review` checked
+the changes against the captured storefront SDK, account-state handling and
+CLI behavior, and independently ran all 30 tests and strict Clippy. No correctness
+or security blockers were found. One stale MCP tool description still mentioned
+website login; root corrected it to the private terminal prompt before release.
+No browser or real account credentials were accessed during this correction.
+
 ## Browser login follow-up — 26 November 2026
 
 A fresh implementer (`browser_login_impl`) added the pure Rust CDP helper, and

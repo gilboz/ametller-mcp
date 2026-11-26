@@ -2,7 +2,6 @@
 
 pub mod api;
 pub mod auth;
-pub mod browser;
 pub mod cart;
 pub mod error;
 pub mod mcp;

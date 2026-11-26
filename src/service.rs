@@ -55,11 +55,6 @@ impl App {
         )
         .await
     }
-    pub async fn login_browser(&self) -> Result<Value> {
-        let api = Api::discover(&self.locale).await?;
-        let response = crate::browser::capture(&self.locale, &api.config).await?;
-        auth::accept_browser_session(&api, &response, &self.store).await
-    }
     pub async fn logout(&self) -> Result<Value> {
         let _lock = self.store.lock().await?;
         self.store.delete()?;

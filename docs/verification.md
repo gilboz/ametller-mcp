@@ -1,5 +1,34 @@
 # Verification record
 
+## CLI login correction — 26 November 2026
+
+Version `0.1.0-beta.3` restores terminal login as the only flow and removes the
+Chrome/CDP helper and its runtime dependencies. Existing browser installations
+are left untouched. The `--password` flag remains a compatibility alias.
+
+The reported post-capture HTTP 400 was traced to `locale` being added to the
+customer profile request. The captured storefront SDK accepts only `siteId` for
+customer/profile and customer/baskets query parameters. An anonymous PKCE probe
+reproduced HTTP 400 with `locale`; the same guest profile request without it
+returned HTTP 404, as a guest is not a persisted registered customer. This proves
+the parameter rejection, not successful registered account access. No user
+credentials were requested or used, and no account/cart mutation was performed.
+
+The client now adds locale only to catalog and the supported checkout basket
+operations. Customer and custom endpoints omit it. Account-check failures report
+the stage and HTTP status, with no response body. Regression coverage exercises
+the strict query contract, terminal-only default login, and preservation of saved
+credentials and pending cart state if the post-login account check fails.
+
+Local formatting, strict Clippy, all 30 Rust tests, release build, Homebrew
+formula syntax and setup-skill validation pass. The unpacked plugin passes real
+stdio discovery and Codex native plugin discovery. A live anonymous product
+search also succeeds. Independent review found no correctness/security blockers;
+one stale authentication tool description was corrected before release.
+
+Registered CLI sign-in, real Keychain persistence and cart compatibility still
+require a successful private login by the account owner.
+
 ## Browser login update — 26 November 2026
 
 Version `0.1.0-beta.2` makes browser login the default; direct terminal login is

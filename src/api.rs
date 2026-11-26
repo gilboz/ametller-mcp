@@ -125,11 +125,16 @@ impl Api {
             .client
             .request(method, url)
             .bearer_auth(token)
-            .query(&[
-                ("siteId", self.config.site_id.as_str()),
-                ("locale", self.locale.as_str()),
-            ])
+            .query(&[("siteId", self.config.site_id.as_str())])
             .query(query);
+        // The customer API rejects locale; custom calls do not declare it.
+        // Only send it to services whose storefront SDK contract accepts it.
+        if matches!(
+            service,
+            "product/shopper-products" | "search/shopper-search" | "checkout/shopper-baskets"
+        ) {
+            request = request.query(&[("locale", self.locale.as_str())]);
+        }
         if let Some(body) = body {
             request = request.json(&body);
         }
@@ -230,6 +235,82 @@ pub fn callback_code(location: &str, expected_state: &str) -> Result<String> {
 mod tests {
     use super::*;
     use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
+    #[tokio::test]
+    async fn customer_and_custom_endpoints_reject_locale_but_keep_site_and_call_parameters() {
+        let server = MockServer::start().await;
+        let api = Api::mock(server.uri());
+        Mock::given(method("GET"))
+            .respond_with(|request: &wiremock::Request| {
+                let query: std::collections::HashMap<_, _> =
+                    request.url.query_pairs().into_owned().collect();
+                assert_eq!(query.get("siteId").map(String::as_str), Some("ametller"));
+                // Reproduce the live customer API's rejection of unknown locale.
+                if query.contains_key("locale") {
+                    return ResponseTemplate::new(400);
+                }
+                if request.url.path().contains("/custom/") {
+                    assert_eq!(query.get("c_productIds").map(String::as_str), Some("42171"));
+                }
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({}))
+            })
+            .expect(3)
+            .mount(&server)
+            .await;
+        for (service, resource, query) in [
+            ("customer/shopper-customers", "customers/customer1", vec![]),
+            (
+                "customer/shopper-customers",
+                "customers/customer1/baskets",
+                vec![],
+            ),
+            (
+                "custom/saved-cart",
+                "sushi-reserve",
+                vec![("c_productIds", "42171".into())],
+            ),
+        ] {
+            api.request(Method::GET, service, resource, "synthetic", &query, None)
+                .await
+                .unwrap();
+        }
+    }
+    #[tokio::test]
+    async fn catalog_and_supported_basket_operations_keep_locale() {
+        let server = MockServer::start().await;
+        let mut api = Api::mock(server.uri());
+        api.locale = "ca".into();
+        Mock::given(wiremock::matchers::query_param("siteId", "ametller"))
+            .and(wiremock::matchers::query_param("locale", "ca"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+            .expect(7)
+            .mount(&server)
+            .await;
+        for (method, service, resource) in [
+            (Method::GET, "product/shopper-products", "products/42171"),
+            (Method::GET, "search/shopper-search", "product-search"),
+            (Method::GET, "checkout/shopper-baskets", "baskets/basket1"),
+            (Method::POST, "checkout/shopper-baskets", "baskets"),
+            (
+                Method::POST,
+                "checkout/shopper-baskets",
+                "baskets/basket1/items",
+            ),
+            (
+                Method::PATCH,
+                "checkout/shopper-baskets",
+                "baskets/basket1/items/line1",
+            ),
+            (
+                Method::DELETE,
+                "checkout/shopper-baskets",
+                "baskets/basket1/items/line1",
+            ),
+        ] {
+            api.request(method, service, resource, "synthetic", &[], None)
+                .await
+                .unwrap();
+        }
+    }
     #[test]
     fn callback_is_pinned_and_unambiguous() {
         assert_eq!(

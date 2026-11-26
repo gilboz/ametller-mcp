@@ -2,8 +2,8 @@
 
 The private repository is [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
 Install the Rust executable with Cargo or Homebrew, then add the small Codex
-plugin. Browser login uses an existing Chrome installation; it does not download
-a browser or require Node.js, Playwright, an extension, or a background service.
+plugin. Login uses a hidden terminal password prompt and direct HTTPS requests.
+No browser, Node.js, extension, or background service is required.
 
 ## Private GitHub access
 
@@ -19,7 +19,7 @@ brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
 brew install gilboz/ametller-mcp/ametller-mcp
 ```
 
-This repository is also the private tap. The formula builds `v0.1.0-beta.2` from
+This repository is also the private tap. The formula builds `v0.1.0-beta.3` from
 source with locked dependencies. It does not include a prebuilt bottle or sign
 into Ametller during installation.
 
@@ -30,7 +30,7 @@ Requires Rust 1.100 or newer and a working platform linker:
 ```sh
 CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install \
   --git https://github.com/gilboz/ametller-mcp.git \
-  --tag v0.1.0-beta.2 --locked ametller-mcp
+  --tag v0.1.0-beta.3 --locked ametller-mcp
 ```
 
 From a trusted checkout, `cargo install --path . --locked` also works. The release
@@ -46,27 +46,25 @@ Run this in your own terminal:
 ametller-mcp login
 ```
 
-The command opens an isolated Chrome window on Ametller's official login page.
-Sign in there and complete any website verification. The helper captures only a
-registered Ametller token response, closes its browser, validates account access
-through the API, and saves the session locally. The temporary profile is removed.
-Your ordinary Chrome profile is not used. Session credentials are kept locally,
-using macOS Keychain by default on macOS. The explicit `--credential-store file`
-backend uses owner-only files, not encryption, and is the available backend on
-Linux. Keep the selected backend and `--state-dir` consistent across CLI and MCP
-processes. `ametller-mcp status` reports local connection status; `status --live`
-checks the saved session with Ametller.
+The command prompts for your email and a hidden password in the terminal. It
+signs in directly to Ametller over HTTPS using PKCE, verifies account access,
+and saves only the session tokens. It does not open a browser. `login --password`
+is accepted as a compatibility alias for the same flow. Never paste credentials
+into chat or pass them as command arguments.
+
+Session credentials use macOS Keychain by default on macOS. The explicit
+`--credential-store file` backend uses owner-only files, not encryption, and is
+the available backend on Linux. Keep the selected backend and `--state-dir`
+consistent across CLI and MCP processes. `ametller-mcp status` reports local
+connection status; `status --live` checks the saved session with Ametller.
 
 Guest search/product details work without this step. Registered login and account
 cart compatibility require a successful first sign-in with your account; mock
-tests do not establish that. The browser flow times out after five minutes;
-closing its window or pressing Ctrl-C cancels it. Existing credentials are kept
-until a new session has passed account validation.
-
-For direct API login instead, use `ametller-mcp login --password`. This requires
-an interactive terminal and prompts for email and a hidden password; it cannot
-complete website challenges. Failures report an HTTP status without printing
-response bodies or assuming a CAPTCHA. Never paste credentials into chat.
+tests do not establish that. Existing credentials are kept until a new login has
+passed account validation. Website challenges cannot be completed through the
+CLI; an HTTP failure alone does not establish that a challenge is present.
+Failures identify sign-in or account verification and preserve the HTTP status
+without printing response bodies.
 
 ## Codex plugin
 

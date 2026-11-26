@@ -118,14 +118,14 @@ async fn authorization_code(response: reqwest::Response, state: &str) -> Result<
             400 => {
                 "The login request was rejected; this does not establish that the password is wrong."
             }
-            401 => "Authentication was not accepted. Use browser login with `ametller-mcp login`.",
-            403 => "The service denied this request. Use browser login with `ametller-mcp login`.",
+            401 => {
+                "Authentication was not accepted. Verify your credentials on the official website."
+            }
+            403 => "The service denied this sign-in request.",
             404 => "The authentication route is unavailable.",
             429 => "The sign-in service is rate limiting requests. Wait before trying again.",
             500..=599 => "The authentication service failed. Try again later.",
-            _ => {
-                "An unexpected login response was received. Try browser login with `ametller-mcp login`."
-            }
+            _ => "An unexpected login response was received.",
         };
         // Never echo an authentication body, redirect URL or server-supplied text.
         return Err(Error::LoginHttp { status, reason });
@@ -198,52 +198,6 @@ pub async fn login(api: &Api, email: &str, password: &str, store: &Store) -> Res
     Ok(profile)
 }
 
-/// Narrow browser-response filter. Parsing JWT metadata is only a filter;
-/// accept_browser_session validates the account through the pinned API.
-pub(crate) fn is_registered_response(body: &str, config: &crate::api::Config) -> bool {
-    if body.len() > 128 * 1024 {
-        return false;
-    }
-    let Ok(value) = serde_json::from_str::<Value>(body) else {
-        return false;
-    };
-    let Some(access) = value["access_token"].as_str() else {
-        return false;
-    };
-    let Some(refresh) = value["refresh_token"].as_str() else {
-        return false;
-    };
-    if refresh.is_empty() || refresh.len() > 32768 {
-        return false;
-    }
-    token_identity(access).is_ok_and(|(customer, site, guest, expiry)| {
-        !guest
-            && site == config.site_id
-            && expiry > now()
-            && value["expires_in"]
-                .as_u64()
-                .is_some_and(|n| n > 0 && n <= 31 * 86400)
-            && value
-                .get("customer_id")
-                .is_none_or(|id| id.as_str() == Some(customer.as_str()))
-    })
-}
-
-/// The browser is already closed when this accepts and stores its session.
-pub async fn accept_browser_session(api: &Api, body: &str, store: &Store) -> Result<Value> {
-    if !is_registered_response(body, &api.config) {
-        return Err(Error::Input(
-            "Browser sign-in did not return a valid registered Ametller session.",
-        ));
-    }
-    let tokens: Value = serde_json::from_str(body).map_err(|_| Error::Response)?;
-    let session = registered_session(&tokens, api, None)?;
-    let _lock = store.lock().await?;
-    let mut profile = validate_customer(api, &session).await?;
-    store.save(&session)?;
-    profile["login_method"] = json!("browser");
-    Ok(profile)
-}
 /// Caller holds the store lock until their complete account operation finishes.
 pub async fn registered(api: &Api, store: &Store) -> Result<Session> {
     let mut session = store.load()?.ok_or(Error::LoginRequired)?;
@@ -283,7 +237,11 @@ pub async fn validate_customer(api: &Api, session: &Session) -> Result<Value> {
             &[],
             None,
         )
-        .await?;
+        .await
+        .map_err(|error| match error {
+            Error::Http(status) => Error::AccountHttp(status),
+            other => other,
+        })?;
     if result["customerId"].as_str() != Some(&session.customer_id)
         || result["authType"].as_str() != Some("registered")
     {
@@ -302,7 +260,7 @@ mod tests {
     use crate::store::CredentialStore;
     use wiremock::{
         Mock, MockServer, ResponseTemplate,
-        matchers::{body_string_contains, method, path},
+        matchers::{body_string_contains, method, path, query_param, query_param_is_missing},
     };
     pub(crate) fn token(customer: &str, expiry: u64) -> String {
         format!("e30.{}.signature",URL_SAFE_NO_PAD.encode(serde_json::to_vec(&json!({"isb":format!("rcid:{customer}::chid:ametller::upn:registered"),"exp":expiry})).unwrap()))
@@ -403,6 +361,8 @@ mod tests {
             .and(path(
                 "/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/customer1",
             ))
+            .and(query_param("siteId", "ametller"))
+            .and(query_param_is_missing("locale"))
             .respond_with(
                 ResponseTemplate::new(200)
                     .set_body_json(json!({"customerId":"customer1","authType":"registered"})),
@@ -476,6 +436,8 @@ mod tests {
             .and(path(
                 "/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/customer1",
             ))
+            .and(query_param("siteId", "ametller"))
+            .and(query_param_is_missing("locale"))
             .respond_with(
                 ResponseTemplate::new(200)
                     .set_body_json(json!({"customerId":"customer1","authType":"registered"})),
@@ -543,37 +505,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn browser_filter_requires_a_live_registered_session_for_this_site() {
-        let api = Api::mock("http://127.0.0.1".into());
-        let valid = json!({"access_token":token("customer1",now()+3600),"refresh_token":"synthetic-refresh","customer_id":"customer1","expires_in":3600});
-        assert!(is_registered_response(&valid.to_string(), &api.config));
-        for (field, replacement) in [
-            ("customer_id", json!("another-customer")),
-            ("refresh_token", json!("")),
-            ("expires_in", json!(0)),
-            ("access_token", json!(token("customer1", now() - 1))),
-        ] {
-            let mut invalid = valid.clone();
-            invalid[field] = replacement;
-            assert!(!is_registered_response(&invalid.to_string(), &api.config));
-        }
-        for isb in [
-            "gcid:guest::chid:ametller::upn:Guest",
-            "rcid:customer1::chid:another-site::upn:registered",
-        ] {
-            let mut invalid = valid.clone();
-            invalid["access_token"] = json!(format!(
-                "e30.{}.signature",
-                URL_SAFE_NO_PAD.encode(json!({"isb":isb,"exp":now()+3600}).to_string())
-            ));
-            assert!(!is_registered_response(&invalid.to_string(), &api.config));
-        }
-        assert!(!is_registered_response("invalid-json", &api.config));
-    }
-
     #[tokio::test]
-    async fn captured_session_is_saved_only_after_live_account_validation() {
+    async fn failed_post_login_account_check_preserves_existing_session_and_pending_cart() {
         let server = MockServer::start().await;
         let api = Api::mock(server.uri());
         let temp = tempfile::tempdir().unwrap();
@@ -596,32 +529,40 @@ mod tests {
                 .set_pending(&json!({"customer_id":"old-account","stage":"set_item"}))
                 .unwrap();
         }
-        let browser = json!({"access_token":token("new-account", now()+3600),"refresh_token":"browser-refresh","customer_id":"new-account","expires_in":3600}).to_string();
-        Mock::given(method("GET"))
-            .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/new-account"))
-            .respond_with(ResponseTemplate::new(403)).expect(1).mount(&server).await;
-        assert!(matches!(
-            accept_browser_session(&api, &browser, &store).await,
-            Err(Error::Http(403))
-        ));
-        assert_eq!(store.load().unwrap().unwrap().customer_id, "old-account");
-        server.verify().await;
-        server.reset().await;
-        Mock::given(method("GET"))
-            .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/new-account"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"customerId":"new-account","authType":"registered"})))
+        Mock::given(method("POST"))
+            .and(path(
+                "/shopper/auth/v1/organizations/f_ecom_blzv_prd/oauth2/login",
+            ))
+            .respond_with(
+                ResponseTemplate::new(303)
+                    .insert_header("Location", format!("{CALLBACK}?code=synthetic-code")),
+            )
+            .expect(1)
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/shopper/auth/v1/organizations/f_ecom_blzv_prd/oauth2/token"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"access_token":token("new-account", now()+3600),"refresh_token":"new-refresh","expires_in":3600})))
             .expect(1).mount(&server).await;
-        let result = accept_browser_session(&api, &browser, &store)
+        Mock::given(method("GET"))
+            .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/new-account"))
+            .and(query_param("siteId", "ametller"))
+            .and(query_param_is_missing("locale"))
+            .respond_with(ResponseTemplate::new(400).set_body_string("private-account-information"))
+            .expect(1).mount(&server).await;
+        let error = login(&api, "new@example.com", "synthetic-password", &store)
             .await
-            .unwrap();
-        assert_eq!(result["login_method"], "browser");
-        assert_eq!(
-            store.load().unwrap().unwrap().refresh_token,
-            "browser-refresh"
-        );
+            .unwrap_err();
+        assert!(matches!(error, Error::AccountHttp(400)));
+        assert!(error.to_string().contains("Account verification"));
+        assert!(!error.to_string().contains("private-account-information"));
+        let saved = store.load().unwrap().unwrap();
+        assert_eq!(saved.customer_id, "old-account");
+        assert_eq!(saved.refresh_token, "old-refresh");
         assert_eq!(
             store.pending().unwrap().unwrap()["customer_id"],
             "old-account"
         );
+        assert_eq!(server.received_requests().await.unwrap().len(), 3);
     }
 }
