@@ -1,5 +1,20 @@
 # Verification record
 
+## Agent-driven history flow — 26 November 2026
+
+Local build `0.1.0-beta.6` makes the intended workflow explicit in server
+instructions, plugin guidance and the README: only private login is a user
+terminal step. The agent calls the history tools, resumes bounded sync batches,
+and performs cached reads itself.
+
+A real `sync_purchase_history` MCP call accessed the saved session and reached
+the order API, then exposed a parsing failure. Salesforce's documented
+`CustomerOrderResult` makes `data` optional. The parser now accepts its omission
+only when `total` is explicitly zero; malformed, nonzero or unknown-total
+responses still fail. The regression covers all four cases. Formatting, strict
+Clippy and all 48 Rust tests pass. See the
+[official response schema](https://salesforcecommercecloud.github.io/commerce-sdk-isomorphic/modules/shoppercustomers.html#CustomerOrderResult).
+
 ## Local order-history cache — 26 November 2026
 
 Development build `0.1.0-beta.5` adds account-scoped SQLite history, bounded and

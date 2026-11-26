@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "ametller",
   "display_name": "Ametller (Apple Silicon)",
-  "version": "0.1.0-beta.5",
+  "version": "0.1.0-beta.6",
   "description": "Find Ametller groceries with photos and manage your shopping cart.",
   "long_description": "Local Rust MCP for macOS on Apple Silicon. Browse products with embedded photos, compare pack sizes and estimated prices, browse cached online purchase history, and change your cart when requested. Reuses the local Ametller CLI session in macOS Keychain. Guest browsing works before login. Checkout and payment remain on Ametller's website. No browser, Homebrew, or language runtime is required to run this bundle.",
   "author": {

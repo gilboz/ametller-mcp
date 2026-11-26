@@ -7,18 +7,15 @@ separate import workflow and are not included.
 
 ## Refresh and browse
 
-```sh
-ametller-mcp sync-history
-ametller-mcp history --limit 20
-ametller-mcp history --order-id ORDER_ID_FROM_HISTORY
-ametller-mcp purchased-products yogur --sort frequent
-ametller-mcp purchased-products --sort recent --limit 10
-```
+Ask the agent in chat to refresh history, show recent orders, or suggest
+previously ordered products. It calls `sync_purchase_history`,
+`get_purchase_history` and `get_purchased_products` for you. No terminal history
+command is required; private login is the only normal terminal step.
 
-The equivalent MCP tools are `sync_purchase_history`, `get_purchase_history`
-and `get_purchased_products`. History reads never access the network or Keychain.
-They select the account from the saved local connection metadata. A valid remote
-session is needed only for refresh; the existing terminal login flow is reused.
+History reads never access the network or Keychain. They select the account from
+saved local connection metadata. A valid remote session is needed only for
+refresh. If macOS prompts for access to the saved Keychain entry, approve that OS
+prompt on your computer; do not send credentials to the agent.
 
 The first refresh creates the database. Repeating a refresh after a completed
 traversal starts at the newest page, updating old order statuses and product
@@ -34,15 +31,15 @@ state and whether refresh is recommended. An absent cache has
 A stale cache is never refreshed implicitly by a read.
 
 Refresh requests 50 orders per page, with five pages per call by default and a
-20-second order-fetch budget. `--max-pages` accepts 1–100. When the stop reason
-is `page_budget` or `time_budget`, run the same sync again to continue. Each
+20-second order-fetch budget. The tool parameter `max_pages` accepts 1–100. When the stop reason
+is `page_budget` or `time_budget`, the agent calls the same sync tool again to continue. Each
 successfully stored order and its cursor commit together, so interrupted work
 can resume. Failures preserve prior records and mark the last attempt failed.
 
 The hard `order_limit` stop is **10,000 orders per traversal**; repeated sync calls
 cannot move past it. Do not present such a cache as complete. Repeated pages,
 changed totals, or mismatched account details stop safely. Use
-`ametller-mcp sync-history --restart` if the history changed during pagination.
+`sync_purchase_history` with `restart: true` if the history changed during pagination.
 Orders previously captured are retained even if the shop later stops listing
 them, so stored counts can exceed the current backend total.
 
@@ -79,15 +76,24 @@ is needed. Homebrew, Codex and Claude share this cache when they use the same
 state directory and account.
 
 Logout removes credentials but retains the log. To delete only the connected
-account's local history, run this before logging out:
-
-```sh
-ametller-mcp clear-history
-```
+account's local history, ask the agent to clear it before logging out. The agent
+can run the local `clear-history` maintenance operation for you.
 
 Remote orders and other accounts' caches are unaffected. No history data belongs
 in Git, release archives, screenshots or diagnostics. Schema errors do not cause
 an automatic database reset.
+
+## Optional CLI for developers
+
+The agent uses MCP tools in normal conversations. These equivalent commands are
+available for development and automation; they are not setup steps for users:
+
+```sh
+ametller-mcp sync-history
+ametller-mcp history --limit 20
+ametller-mcp history --order-id ORDER_ID_FROM_HISTORY
+ametller-mcp purchased-products yogur --sort frequent
+```
 
 ## Source contracts
 

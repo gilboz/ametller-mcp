@@ -7,7 +7,7 @@ shopping. No browser installation or automation is required. There is no
 checkout/payment tool or background service.
 
 Repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-The current development version is `0.1.0-beta.5`. Product tools return embedded image content
+The current development version is `0.1.0-beta.6`. Product tools return embedded image content
 alongside structured product data and original photo URLs. See
 [verification](docs/verification.md) for the checks performed and remaining limits.
 
@@ -17,8 +17,8 @@ alongside structured product data and original photo URLs. See
 
 On an **Apple Silicon Mac** (M1 or later):
 
-1. Download `ametller-0.1.0-beta.5-macos-arm64.mcpb` from the
-   [release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.5).
+1. Download `ametller-0.1.0-beta.6-macos-arm64.mcpb` from the
+   [release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.6).
 2. Double-click it and choose **Install** in Claude. Alternatively, use **Settings
    → Desktop app → Extensions → Manage → Advanced settings → Install Extension…**
    (older versions: **Settings → Extensions**).
@@ -83,19 +83,19 @@ custom shopping carousel is not bundled. CLI commands continue to return JSON.
 
 ## Purchase history and repeat shopping
 
-```sh
-ametller-mcp sync-history
-ametller-mcp history
-ametller-mcp history --order-id ORDER_ID_FROM_HISTORY
-ametller-mcp purchased-products yogur --sort frequent
-```
+After the private login, ask the agent in chat:
 
-`sync-history` fetches the account's online orders with read-only requests and
-upserts them into an account-specific SQLite database in the private application
-state directory. Ordinary history/product-history reads use only that database;
-they do not contact Ametller or read Keychain credentials. Each response includes
-cache freshness and completeness. Repeat sync calls resume page/time-limited
-batches; `--restart` starts a new traversal if the backend history changed.
+- “Refresh my Ametller order history.”
+- “Show my recent orders.”
+- “Which yogurts have I bought most often?”
+
+The agent calls `sync_purchase_history`, `get_purchase_history`, and
+`get_purchased_products`. You do not need to run history commands in a terminal.
+The sync tool fetches online orders with read-only requests and upserts them into
+an account-specific SQLite database. Ordinary history reads use only that
+local database and include freshness/completeness information. The agent resumes
+bounded batches when needed. Terminal commands remain an optional developer
+interface; only private login is part of the normal user workflow.
 
 This covers **online orders available through Ametller's API**. In-store receipt
 emails are a separate source and are not imported here. Historical prices and

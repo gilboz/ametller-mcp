@@ -417,7 +417,14 @@ async fn refresh(
             deadline,
         )
         .await?;
-        let rows = response["data"].as_array().ok_or(Error::Response)?;
+        // SCAPI's CustomerOrderResult makes data optional. Omission is an
+        // empty history only when the server explicitly reports total == 0.
+        // Missing/malformed rows with an unknown or nonzero total still fail.
+        let rows: &[Value] = match response.get("data") {
+            Some(Value::Array(rows)) => rows,
+            None if response["total"].as_u64() == Some(0) => &[],
+            _ => return Err(Error::Response),
+        };
         if rows.len() > PAGE_SIZE
             || response["offset"]
                 .as_u64()
@@ -1008,5 +1015,38 @@ mod tests {
                 .len(),
             1
         );
+    }
+    #[tokio::test]
+    async fn omitted_order_array_is_empty_only_with_an_explicit_zero_total() {
+        for (response, is_empty) in [
+            (json!({"limit":50,"offset":0,"total":0}), true),
+            (json!({"limit":50,"offset":0,"total":1}), false),
+            (json!({"limit":50,"offset":0}), false),
+            (json!({"limit":50,"offset":0,"total":0,"data":{}}), false),
+        ] {
+            let server = MockServer::start().await;
+            let api = Api::mock(server.uri());
+            let session = session(&api, "customer1");
+            let root = tempfile::tempdir().unwrap();
+            let store = store(root.path());
+            let _guard = store.lock().await.unwrap();
+            Mock::given(method("GET"))
+                .and(path("/customer/shopper-customers/v1/organizations/f_ecom_blzv_prd/customers/customer1/orders"))
+                .respond_with(ResponseTemplate::new(200).set_body_json(response))
+                .expect(1).mount(&server).await;
+            let result = sync(&api, &session, &store, 1, false).await;
+            if is_empty {
+                let result = result.unwrap();
+                assert_eq!(result["cache"]["complete"], true);
+                assert_eq!(result["cache"]["reported_total"], 0);
+                assert_eq!(result["stop_reason"], "complete");
+            } else {
+                assert!(matches!(result, Err(Error::Response)));
+                assert_eq!(
+                    orders(&store, "customer1", None, 20, 0).unwrap()["cache"]["complete"],
+                    false
+                );
+            }
+        }
     }
 }

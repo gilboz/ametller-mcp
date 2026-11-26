@@ -21,7 +21,7 @@ brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
 brew install gilboz/ametller-mcp/ametller-mcp
 ```
 
-This repository is also the private tap. The formula builds `v0.1.0-beta.5` from
+This repository is also the private tap. The formula builds `v0.1.0-beta.6` from
 source with locked dependencies. It does not include a prebuilt bottle or sign
 into Ametller during installation.
 
@@ -32,7 +32,7 @@ Requires Rust 1.100 or newer and a working platform linker:
 ```sh
 CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install \
   --git https://github.com/gilboz/ametller-mcp.git \
-  --tag v0.1.0-beta.5 --locked ametller-mcp
+  --tag v0.1.0-beta.6 --locked ametller-mcp
 ```
 
 From a trusted checkout, `cargo install --path . --locked` also works. The release

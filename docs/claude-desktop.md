@@ -1,6 +1,6 @@
 # Claude desktop extension
 
-The release includes `ametller-0.1.0-beta.5-macos-arm64.mcpb`, a self-contained
+The release includes `ametller-0.1.0-beta.6-macos-arm64.mcpb`, a self-contained
 extension for **Claude Desktop on Apple Silicon Macs** (M1 or later). It bundles
 the compiled Rust server and needs no Homebrew, Node, Python, or browser to run.
 It is a local extension; it does not deploy a cloud server or enable Claude web
@@ -9,7 +9,7 @@ or mobile. Intel Macs, Windows and Linux are not supported by this bundle.
 ## Install in Claude
 
 1. Download the `.mcpb` asset from the
-   [beta.5 release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.5).
+   [beta.6 release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.6).
    If repository access is restricted, sign into GitHub first.
 2. Double-click the file and choose **Install** in Claude. Alternatively, open
    **Settings → Desktop app → Extensions → Manage → Advanced settings → Install
@@ -39,13 +39,10 @@ Guest product searches work before sign-in. Cart reads and changes require your
 registered account. When already installed through Homebrew or Cargo, sign in
 privately with `ametller-mcp login` in your own Terminal.
 
-For a fresh Mac without the CLI installed, the bundle includes a terminal login
-helper. Extract the downloaded bundle into a directory you choose and run it:
-
-```sh
-unzip "$HOME/Downloads/ametller-0.1.0-beta.5-macos-arm64.mcpb" -d "$HOME/ametller-login-beta5"
-"$HOME/ametller-login-beta5/login.command"
-```
+For a fresh Mac without the CLI installed, ask the agent to extract the downloaded
+bundle and prepare its included `login.command` helper. The agent handles that
+file setup. Open the helper to sign in privately in Terminal; no terminal history
+or shopping commands are required.
 
 The helper prompts for email and a hidden password. It saves only session tokens
 in Keychain, with account metadata in the standard private application directory.
