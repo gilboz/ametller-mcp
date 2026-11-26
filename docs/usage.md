@@ -23,7 +23,15 @@ ametller-mcp status --live
 ametller-mcp logout
 ```
 
-Only `login` prompts for credentials, and it requires an interactive terminal.
+`login` opens an isolated Chrome window so you can sign in on Ametller's website.
+The helper captures access/refresh tokens locally, closes the browser and checks
+the account through the API before saving them. It does not read the password
+form, export a HAR, or reuse your ordinary browser profile. Closing the window,
+pressing Ctrl-C or the five-minute timeout cancels login and cleans up its profile.
+
+`login --password` selects direct API login with a hidden terminal password prompt.
+That alternative requires an interactive terminal. Neither flow accepts secrets
+as arguments or MCP parameters.
 Ordinary status reports local metadata; it does not prove the remote session is
 currently accepted. Live status checks account access. Refresh tokens rotate
 under a local process lock. Login passwords are not saved.
@@ -40,9 +48,9 @@ File storage is plaintext protected by owner-only permissions. State is separate
 from the repository, Homebrew Cellar and plugin cache. The launcher forwards
 matching path/backend settings listed in [installation](installation.md).
 
-The initial release uses direct API login. It cannot handle an interactive
-browser challenge. A failed route/network request does not prove your password
-is wrong; avoid repeated sign-in attempts and preserve the reported error.
+Browser login lets the user complete website challenges normally. Direct password
+login cannot do that. A failed route/network request does not prove your password
+is wrong; failures preserve the HTTP status and omit response bodies.
 
 ## Cart review and changes
 

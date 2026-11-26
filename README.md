@@ -2,11 +2,12 @@
 
 A small local Rust MCP and CLI for Ametller Origen: search products, inspect names,
 photos, descriptions and pack sizes, read your real cart, and set item quantities.
-Direct CLI sign-in uses the same Salesforce Commerce login protocol as the shop.
-There is no browser dependency, checkout/payment tool, or background service.
+Sign in on the official website through an isolated window of your installed
+Chrome, then use direct API calls for shopping. Direct CLI password login remains
+available with `login --password`. There is no checkout/payment tool or background service.
 
 Private repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-The first release is `0.1.0-beta.1`. See [verification](docs/verification.md) for
+The current release is `0.1.0-beta.2`. See [verification](docs/verification.md) for
 the checks actually performed; account login and real cart compatibility are
 unverified until the account owner signs in and exercises them.
 
@@ -32,9 +33,10 @@ ametller-mcp search "yogur" --limit 5
 ametller-mcp product 42171
 ```
 
-For your real cart, run `ametller-mcp login` in your own terminal. It prompts for
-email and a hidden password; no password is accepted as a command argument or
-MCP tool parameter. The password is not saved. On macOS, session credentials use
+For your real cart, run `ametller-mcp login` in your own terminal. Sign in on
+Ametller's page in the Chrome window it opens; the helper captures the resulting
+session locally and closes its temporary browser. No password or token is accepted
+as a command argument or MCP tool parameter. On macOS, session credentials use
 Keychain by default; an explicit file backend is available and uses private
 permissions, not encryption. See [usage](docs/usage.md).
 
@@ -70,7 +72,8 @@ python3 scripts/package_plugin.py
 ```
 
 The stdio server is `ametller-mcp serve`. Diagnostics go to stderr and stdout is
-reserved for the MCP protocol. No HTTP listening port is opened.
+reserved for the MCP protocol. The MCP opens no HTTP listener; browser sign-in
+temporarily uses a loopback-only Chrome debugging connection with a separate profile.
 
 ## Layout and research
 

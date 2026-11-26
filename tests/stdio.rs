@@ -88,6 +88,7 @@ fn credentials_cannot_be_piped_or_passed_as_arguments() {
         .args(["--credential-store", "file", "--state-dir"])
         .arg(temp.path().join("state"))
         .arg("login")
+        .arg("--password")
         .stdin(Stdio::null())
         .output()
         .unwrap();

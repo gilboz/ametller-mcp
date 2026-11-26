@@ -1,8 +1,8 @@
 class AmetllerMcp < Formula
   desc "Local Ametller grocery catalog and cart MCP server"
   homepage "https://github.com/gilboz/ametller-mcp"
-  url "https://github.com/gilboz/ametller-mcp.git", tag: "v0.1.0-beta.1"
-  version "0.1.0-beta.1"
+  url "https://github.com/gilboz/ametller-mcp.git", tag: "v0.1.0-beta.2"
+  version "0.1.0-beta.2"
   license "MIT"
 
   depends_on "rust" => :build

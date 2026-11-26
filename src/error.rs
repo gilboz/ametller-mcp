@@ -6,6 +6,8 @@ pub enum Error {
     Input(&'static str),
     #[error("The shop returned HTTP {0}. No request was retried.")]
     Http(u16),
+    #[error("The sign-in service returned HTTP {status}: {reason} No request was retried.")]
+    LoginHttp { status: u16, reason: &'static str },
     #[error("Network request failed or timed out. No request was retried.")]
     Network,
     #[error("The shop returned an invalid or oversized response.")]

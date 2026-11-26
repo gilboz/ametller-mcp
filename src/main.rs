@@ -36,8 +36,12 @@ enum Command {
     Serve,
     /// Print offline capabilities.
     Capabilities,
-    /// Sign in using terminal-only email and hidden password. No browser required.
-    Login,
+    /// Sign in on the official website in an isolated Chrome window.
+    Login {
+        /// Use direct API login with terminal-only email and hidden password instead.
+        #[arg(long)]
+        password: bool,
+    },
     /// Delete local credentials; does not remotely revoke the session.
     Logout,
     /// Read cached connection metadata, or validate with the shop using --live.
@@ -115,9 +119,13 @@ async fn run() -> Result<()> {
     let output = match cli.command.unwrap_or(Command::Serve) {
         Command::Serve => return mcp::serve(app).await,
         Command::Capabilities => unreachable!(),
-        Command::Login => {
-            let (email, password) = credentials()?;
-            app.login(&email, &password).await?
+        Command::Login { password } => {
+            if password {
+                let (email, password) = credentials()?;
+                app.login(&email, &password).await?
+            } else {
+                app.login_browser().await?
+            }
         }
         Command::Logout => app.logout().await?,
         Command::Status { live } => app.status(live).await?,

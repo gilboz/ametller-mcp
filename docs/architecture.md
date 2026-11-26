@@ -19,16 +19,32 @@ CLI / MCP -> service -> catalog and cart operations -> pinned SCAPI proxy
 | `service` | Guest/account workflows and normalized product output. |
 | `api` | Public configuration discovery, fixed HTTPS origins, parameter validation, request timeouts and bounded bodies. |
 | `auth` | Guest and registered PKCE, account validation and refresh rotation. |
+| `browser` | Isolated installed Chrome, loopback CDP session capture and cleanup. |
 | `store` | Keychain/file credentials, private atomic state files and cross-process lock. |
 | `cart` | Active basket discovery, exact quantity validation, mutations and uncertain-outcome reconciliation. |
 | `error` | Bounded, non-secret errors; raw HTTP responses are not exposed. |
 
 ## Authentication
 
-The CLI prompts privately for email/password and performs direct SLAS B2C login.
-It consumes the authorization redirect without following it or opening a browser.
-MCP has no password parameter or interactive login prompt. A real browser challenge
-requires a future fallback; no challenge bypass is attempted.
+Default CLI login opens installed Chrome with its own temporary profile and a
+loopback-only debugging endpoint. The user signs in on Ametller's official page.
+The helper captures only successful token responses from the pinned storefront
+proxy or Salesforce host and expected organization, after the network response
+finishes. Guest tokens are ignored. A captured registered session is checked
+against the account API before credentials are saved. Chrome is closed and its
+temporary profile removed before persistence. Normal browser profiles are not
+attached, and cookies, HARs and request bodies are not exported or inspected.
+
+The capture has a five-minute timeout, cancellation/closed-window handling,
+bounded WebSocket messages/token bodies and bounded request tracking. The regular
+test suite uses a fake CDP server; a real Chrome about:blank smoke is explicitly
+ignored unless an operator selects it. No browser is downloaded automatically.
+
+`login --password` retains direct SLAS B2C login with a hidden terminal prompt,
+UUIDv4 USID and PKCE. It consumes the redirect without opening its URL. Unexpected
+responses report the HTTP status with a fixed message, never a raw response body
+or an unsupported inference that a CAPTCHA is present. MCP has no password/token
+argument or interactive login tool; sign-in remains a local CLI operation.
 
 Guest catalog tokens remain in RAM. Registered access/refresh tokens use Keychain
 on macOS by default, or a private plaintext file backend when selected. Private

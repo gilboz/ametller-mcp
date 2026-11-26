@@ -1,5 +1,16 @@
 # Independent review iterations
 
+## Browser login follow-up — 26 November 2026
+
+A fresh implementer (`browser_login_impl`) added the pure Rust CDP helper, and
+root integrated account validation, CLI defaults and safe errors. A separate
+fresh reviewer (`browser_login_review`) checked the new helper and integration,
+with no actionable P1/P2 findings. The regular suite passes 38 tests; root also
+ran the explicitly ignored real-Chrome blank-page launch/connect/cleanup smoke.
+No actual account sign-in or real Keychain session was used by these agents.
+
+## Initial beta review process
+
 The user requested three iterations with fresh reviewers and fixers. Each agent
 reads the current working tree; reviewers do not edit it. Account tests use
 synthetic responses and temporary file-backed state, never the user's account.

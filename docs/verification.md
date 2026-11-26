@@ -1,6 +1,26 @@
-# Verification record — 25 November 2026
+# Verification record
 
-## Rust beta implementation
+## Browser login update — 26 November 2026
+
+Version `0.1.0-beta.2` makes browser login the default; direct terminal login is
+available with `login --password`. The user reported direct CLI failure despite
+successful website login. The old error represented every unexpected HTTP
+response and did not establish either incorrect credentials or a CAPTCHA.
+Direct login also now sends the documented UUIDv4 shopper identifier.
+
+An independent fresh reviewer checked token URL/event boundaries, guest filtering,
+response limits, account validation before saving, cleanup and CLI integration,
+with no actionable P1/P2 findings. All 38 normal tests pass. The explicitly
+selected installed-Chrome about:blank smoke also passed on this Mac: launch,
+loopback CDP connection and browser/profile cleanup. Normal tests do not open a
+browser. Actual user sign-in, real Keychain persistence and session refresh still
+need a successful user login; no account session was captured during these tests.
+
+Homebrew `0.1.0-beta.1` installation and `brew test` passed on 26 November, along
+with installed-plugin discovery and guest product search. The records below
+describe the initial release before that installation.
+
+## Initial Rust beta implementation — 25 November 2026
 
 The final implementation passes formatting, Clippy with warnings denied, and
 26 Rust tests (22 unit, two captured-contract and two subprocess tests).
