@@ -19,6 +19,7 @@ CLI / MCP -> service -> catalog and cart operations -> pinned SCAPI proxy
 | `service` | Guest/account workflows and normalized product output. |
 | `api` | Public configuration discovery, fixed HTTPS origins, parameter validation, request timeouts and bounded bodies. |
 | `auth` | Guest and registered PKCE, account validation and refresh rotation. |
+| `photos` | Public-only image downloads, bounded decoding/thumbnails, and MCP image blocks. |
 | `store` | Keychain/file credentials, private atomic state files and cross-process lock. |
 | `cart` | Active basket discovery, exact quantity validation, mutations and uncertain-outcome reconciliation. |
 | `error` | Bounded, non-secret errors; raw HTTP responses are not exposed. |
@@ -63,8 +64,21 @@ credentials or metadata without requiring both to exist.
 Search and detail use the live guest catalog. Prices are estimates, availability
 is scoped to the catalog, and missing values remain unknown. Product output
 includes official image URLs, descriptions stripped of markup, canonical links,
-pack/unit information and min/step quantities. This is structured data; rich image
-rendering depends on the host, and a custom MCP App is outside this release.
+pack/unit information and min/step quantities. MCP product tools also return
+actual JPEG image content blocks with captions and `photo_previews` metadata
+mapping each product to its content indexes. Search includes at most eight
+previews (one per product); detail includes up to three. CLI JSON remains unchanged.
+A host controls image presentation; a custom MCP App is outside this release.
+
+The image client is separate from authenticated API requests. It accepts only
+pinned HTTPS retailer static product paths, sends no account credentials, and
+never follows redirects or retries. Each source is capped at 4 MiB and 8 megapixels
+(with at most 4096 pixels per dimension and a configured 64 MiB decoder
+allocation budget).
+Previews have a maximum edge of 512 pixels and are JPEG-encoded at quality 78,
+with a 192 KiB per-image limit and a 1.5 MiB total base64-data budget. Three jobs
+run concurrently across all calls;
+a photo failure or timeout leaves the catalog data and source URLs available.
 
 `get_cart` never creates a basket. `set_cart_item` sets the desired absolute
 purchase-unit quantity; zero removes a known line. IDs are validated separately
@@ -91,8 +105,11 @@ workspace was introduced. No GPL Tuta implementation is included in this crate.
 `cargo package` produces a standard private `.crate` source archive. The Homebrew
 formula builds the tagged source with locked dependencies. The Codex plugin
 contains only a manifest, stdio launcher and setup skill; it locates the separately
-installed binary. The release excludes storefront bundles, upstream checkouts,
-account state and credentials.
+installed binary. The separate Claude `.mcpb` includes a native Apple Silicon
+executable, manifest, terminal login helper and documentation. Its packager checks
+the native architecture and version and archives an explicit six-file inventory.
+Both hosts reuse the default local session and process lock. The release excludes
+storefront bundles, upstream checkouts, account state and credentials.
 
 See [usage](usage.md), [installation](installation.md), [verification](verification.md)
 and [the original API map](frontend-api.md).

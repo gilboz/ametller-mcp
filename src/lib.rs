@@ -5,6 +5,7 @@ pub mod auth;
 pub mod cart;
 pub mod error;
 pub mod mcp;
+pub mod photos;
 pub mod service;
 pub mod store;
 pub use error::{Error, Result};

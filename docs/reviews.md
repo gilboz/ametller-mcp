@@ -1,5 +1,22 @@
 # Independent review iterations
 
+## Embedded photos and Claude desktop bundle — 26 November 2026
+
+Implementer `embedded_product_images` added the Rust photo pipeline, protocol
+integration and seven tests. Fresh reviewer `embedded_images_review` found one
+P2: the initial dimension probe used the decoder's default allocation budget.
+The implementer applied the configured budget before both parsing stages and
+added a compressed ICC-metadata regression; the reviewer confirmed the fix and
+reported no remaining blockers. All 37 Rust tests and strict lint checks pass.
+
+Root implemented the native Claude `.mcpb`, package validation and documentation.
+Fresh reviewer `claude_bundle_review` checked manifest compatibility, terminal
+login/state sharing, archive permissions, paths with spaces, and the official
+installation steps. The reviewer ran the debug bundle smoke with no findings;
+root repeated it against the final release binary. Claude UI installation and
+visual presentation were blocked by the computer-use policy and are not claimed
+as verified.
+
 ## CLI login correction — 26 November 2026
 
 Root removed the Chrome helper, restored terminal login and corrected the

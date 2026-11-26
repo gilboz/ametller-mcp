@@ -97,9 +97,10 @@ switching accounts does not authorize clearing another account's pending record.
 
 ## Presentation and checkout
 
-The server returns structured JSON and text-compatible tool output with official
-photo URLs. Hosts can display those as images/cards where supported; no rendering
-guarantee is implied by returning a URL. Compare exact pack size and price per unit.
+Product tools return structured JSON with official photo URLs plus standard MCP
+image blocks carrying actual thumbnails. The host controls how those images are
+presented; a URL alone is not a rendering guarantee. CLI commands remain JSON.
+Compare exact pack size and price per unit.
 
 Use the official [Ametller shop](https://www.ametllerorigen.com/es/online) to review
 delivery, substitutions, final totals and payment, signing into the same account

@@ -1,5 +1,40 @@
 # Verification record
 
+## Embedded photos and Claude desktop bundle — 26 November 2026
+
+Version `0.1.0-beta.4` changes the MCP tool contract: product tools now include
+actual JPEG image content blocks, captions and structured product/image indexes.
+This is implemented in Rust, independently of the earlier one-off chat gallery.
+CLI JSON and account/cart semantics are unchanged.
+
+Local formatting, strict Clippy and all 37 Rust tests pass, including seven image
+checks. These cover source restrictions, redirects/MIME/oversized content,
+thumbnail dimensions, product identity mapping, aggregate response limits,
+compressed ancillary metadata and fallback behavior. A fresh reviewer found and
+resolved an overly permissive dimension-probe allocation budget; both header
+parsing and pixel decoding now use the configured decoder limits.
+
+A real stdio guest search returned two JPEG image blocks for products `3011` and
+`10829`, with an 83,484-byte response and valid content-index mapping. Both decoded
+photos have a maximum edge of 512 pixels. A decoded product photo was also
+visually inspected. This used temporary file-backed state, which stayed absent;
+no registered credentials or cart mutations were involved.
+
+The Claude `.mcpb` manifest passes the official `@anthropic-ai/mcpb@2.1.2`
+validator. Both debug and final release bundles pass extraction, six-file
+inventory, executable permissions, native architecture/version checks, paths
+with spaces, five-tool discovery, empty-session errors and terminal login helper
+checks. The release binary links only macOS system libraries. Codex plugin
+native discovery and real stdio checks also pass. The Homebrew formula syntax
+and setup-skill validator pass.
+
+The Claude app is installed on this Mac, but the session's computer-use policy
+blocks access to it. Actual installation clicks and photo presentation inside
+Claude therefore remain unverified. A valid MCP image block is a protocol result,
+not proof of a particular host's visual layout. The packaged README documents
+manual installation and shared local login; no Claude settings were edited to
+work around that restriction.
+
 ## CLI login correction — 26 November 2026
 
 Version `0.1.0-beta.3` restores terminal login as the only flow and removes the

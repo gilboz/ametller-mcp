@@ -7,11 +7,31 @@ shopping. No browser installation or automation is required. There is no
 checkout/payment tool or background service.
 
 Private repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-The current release is `0.1.0-beta.3`. See [verification](docs/verification.md) for
-the checks actually performed; account login and real cart compatibility are
-unverified until the account owner signs in and exercises them.
+The current release is `0.1.0-beta.4`. Product tools return embedded image content
+alongside structured product data and original photo URLs. See
+[verification](docs/verification.md) for the checks performed and remaining limits.
 
 ## Install
+
+### Claude desktop app
+
+On an **Apple Silicon Mac** (M1 or later):
+
+1. Download `ametller-0.1.0-beta.4-macos-arm64.mcpb` from the private
+   [release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.4).
+2. Double-click it and choose **Install** in Claude. Alternatively, use **Settings
+   → Desktop app → Extensions → Manage → Advanced settings → Install Extension…**
+   (older versions: **Settings → Extensions**).
+3. Leave the language as `es`, or enter `ca`, and enable Ametller.
+4. Ask Claude: “Show me Greek yogurts with photos and prices.”
+
+The bundle includes the Rust executable and runs without Homebrew, Node or Python.
+Your existing default Ametller CLI/Keychain login on this Mac is reused; guest
+browsing works without login. For a fresh installation, terminal sign-in, updates,
+and platform limitations, see [Claude desktop setup](docs/claude-desktop.md).
+This is a local desktop extension; it does not require cloud hosting.
+
+### Homebrew and Codex
 
 ```sh
 brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
@@ -46,7 +66,7 @@ The MCP exposes five tools:
 | Tool | Purpose |
 | --- | --- |
 | `authentication_status` | Report whether this local installation has saved account authentication. |
-| `search_products` | Search the live guest catalog with official image URLs, pack sizes and price context. |
+| `search_products` | Search the live guest catalog with embedded photos, pack sizes and price context. |
 | `get_product` | Read a product's description, photos, availability and purchase-quantity rules. |
 | `get_cart` | Read the registered account's cart; an absent cart stays absent. |
 | `set_cart_item` | Set a selected product/line to an absolute quantity; zero removes it. |
@@ -54,8 +74,9 @@ The MCP exposes five tools:
 Show proposed groceries before adding them unless the user has already asked for
 those exact cart changes. Product suggestions do not imply authorization. A
 returned cart is a reviewable estimate, not an order: delivery, final weighed
-prices and payment are completed on the official website. Photo URLs are included;
-a clickable photo-grid UI is not bundled and rendering depends on the MCP client.
+prices and payment are completed on the official website. Standard MCP image
+blocks carry the actual photo bytes; the host decides how to present them. A
+custom shopping carousel is not bundled. CLI commands continue to return JSON.
 
 ## Development
 
@@ -70,6 +91,10 @@ cargo build --locked
 python3 tests/check_distribution.py --binary target/debug/ametller-mcp
 cargo package --locked
 python3 scripts/package_plugin.py
+# On an Apple Silicon Mac:
+cargo build --release --locked
+python3 scripts/package_mcpb.py --binary target/release/ametller-mcp
+python3 tests/check_mcpb.py --binary target/release/ametller-mcp
 ```
 
 The stdio server is `ametller-mcp serve`. Diagnostics go to stderr and stdout is
@@ -82,6 +107,7 @@ src/              Rust implementation
 tests/            Mock protocol, cart, stdio and package checks
 docs/             Usage, installation, architecture and research notes
 plugins/ametller/  Codex plugin and setup skill
+plugins/claude/    Claude desktop bundle manifest and terminal login helper
 Formula/          Private Homebrew tap formula
 sources/          Public research captures and pinned reference manifests
 scripts/          Checks, plugin packaging and public research capture tools

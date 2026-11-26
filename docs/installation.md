@@ -1,9 +1,11 @@
 # Installation
 
 The private repository is [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-Install the Rust executable with Cargo or Homebrew, then add the small Codex
-plugin. Login uses a hidden terminal password prompt and direct HTTPS requests.
-No browser, Node.js, extension, or background service is required.
+For Claude Desktop on an Apple Silicon Mac, install the self-contained `.mcpb`
+from the release: see [Claude desktop setup](claude-desktop.md). For Codex or other
+stdio clients, install the Rust executable with Cargo or Homebrew. Login uses a
+hidden terminal password prompt and direct HTTPS requests. No browser or
+background service is required.
 
 ## Private GitHub access
 
@@ -19,7 +21,7 @@ brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
 brew install gilboz/ametller-mcp/ametller-mcp
 ```
 
-This repository is also the private tap. The formula builds `v0.1.0-beta.3` from
+This repository is also the private tap. The formula builds `v0.1.0-beta.4` from
 source with locked dependencies. It does not include a prebuilt bottle or sign
 into Ametller during installation.
 
@@ -30,7 +32,7 @@ Requires Rust 1.100 or newer and a working platform linker:
 ```sh
 CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install \
   --git https://github.com/gilboz/ametller-mcp.git \
-  --tag v0.1.0-beta.3 --locked ametller-mcp
+  --tag v0.1.0-beta.4 --locked ametller-mcp
 ```
 
 From a trusted checkout, `cargo install --path . --locked` also works. The release
@@ -90,8 +92,9 @@ Optional settings contain paths/backend choices only:
 
 The server starts and lists tools before account login. It never prompts for a
 password through MCP, so an unconnected plugin does not hang on terminal input.
-Photos are returned as official URLs with product metadata; actual rendering
-depends on the client. No interactive shopping UI is bundled in this release.
+Product tools return embedded MCP image blocks with product metadata and the
+original photo URLs. The client controls their presentation. No interactive
+shopping UI is bundled in this release.
 
 For any local stdio MCP client, an equivalent connection is:
 

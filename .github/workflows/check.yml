@@ -24,3 +24,8 @@ jobs:
           cargo build --locked
           python3 tests/check_distribution.py --binary target/debug/ametller-mcp
           cargo package --locked
+      - name: Validate Claude extension manifest
+        run: npm exec --yes --ignore-scripts --package=@anthropic-ai/mcpb@2.1.2 -- mcpb validate plugins/claude/manifest.json
+      - name: Check native Claude bundle
+        if: runner.os == 'macOS' && runner.arch == 'ARM64'
+        run: python3 tests/check_mcpb.py --binary target/debug/ametller-mcp
