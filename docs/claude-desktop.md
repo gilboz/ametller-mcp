@@ -10,7 +10,7 @@ or mobile. Intel Macs, Windows and Linux are not supported by this bundle.
 
 1. Download the `.mcpb` asset from the
    [beta.6 release](https://github.com/gilboz/ametller-mcp/releases/tag/v0.1.0-beta.6).
-   If repository access is restricted, sign into GitHub first.
+   The download is public; no GitHub login is required.
 2. Double-click the file and choose **Install** in Claude. Alternatively, open
    **Settings → Desktop app → Extensions → Manage → Advanced settings → Install
    Extension…**, then select the file. Older Claude versions use **Settings →
@@ -43,6 +43,14 @@ For a fresh Mac without the CLI installed, ask the agent to extract the download
 bundle and prepare its included `login.command` helper. The agent handles that
 file setup. Open the helper to sign in privately in Terminal; no terminal history
 or shopping commands are required.
+
+If the agent cannot manage local files, duplicate the downloaded `.mcpb` in
+Finder, change the copy's extension to `.zip`, and open that copy to extract it.
+Open `login.command` inside the extracted folder. Keep its `server` folder next
+to it. This runs the same private login prompt without installing Homebrew.
+
+Each colleague signs in to their own Ametller account. The bundle contains no
+saved login, purchase database or other user's account data.
 
 The helper prompts for email and a hidden password. It saves only session tokens
 in Keychain, with account metadata in the standard private application directory.

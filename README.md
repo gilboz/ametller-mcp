@@ -7,7 +7,7 @@ shopping. No browser installation or automation is required. There is no
 checkout/payment tool or background service.
 
 Repository: [gilboz/ametller-mcp](https://github.com/gilboz/ametller-mcp).
-The current development version is `0.1.0-beta.6`. Product tools return embedded image content
+The current release is `0.1.0-beta.6`. Product tools return embedded image content
 alongside structured product data and original photo URLs. See
 [verification](docs/verification.md) for the checks performed and remaining limits.
 
@@ -40,7 +40,7 @@ codex plugin marketplace add gilboz/ametller-mcp --ref main
 codex plugin add ametller@ametller-mcp
 ```
 
-If repository access is restricted, sign into GitHub before downloading. Cargo and source archive
+The repository and release downloads are public. Cargo and source archive
 installation, plugin connection and removal are in [installation](docs/installation.md).
 Nothing signs in or modifies your cart during installation.
 

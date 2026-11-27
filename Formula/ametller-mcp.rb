@@ -19,7 +19,7 @@ class AmetllerMcp < Formula
 
   def caveats
     <<~EOS
-      This private source repository requires GitHub access through Git.
+      Source and release downloads are public; no GitHub login is required.
       Sign in privately with: ametller-mcp login
 
       Add the Codex plugin:

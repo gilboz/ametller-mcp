@@ -9,10 +9,9 @@ background service is required.
 
 ## GitHub access
 
-If the repository is private, reuse existing GitHub authentication. On a new machine, `gh auth login` and
-`gh auth setup-git` configure access for private HTTPS Git downloads. Never put
-a token into a repository URL or the formula. Homebrew supports the GitHub CLI
-credential helper for private Git sources; see [Homebrew's guidance](https://docs.brew.sh/FAQ#how-do-i-authenticate-private-git-source-downloads).
+The repository and release assets are public. Downloading or installing them does
+not require a GitHub account or access token. Your Ametller login is separate and
+is entered privately on your own computer.
 
 ## Homebrew
 
@@ -21,7 +20,7 @@ brew tap gilboz/ametller-mcp https://github.com/gilboz/ametller-mcp.git
 brew install gilboz/ametller-mcp/ametller-mcp
 ```
 
-This repository is also the private tap. The formula builds `v0.1.0-beta.6` from
+This repository is also the Homebrew tap. The formula builds `v0.1.0-beta.6` from
 source with locked dependencies. It does not include a prebuilt bottle or sign
 into Ametller during installation.
 
